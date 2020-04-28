@@ -1,0 +1,8 @@
+<RCC>
+    <qresource prefix="/fd">
+        <file>images/mini_btn_bg.jpg</file>
+        <file>images/close_btn_bg.jpg</file>
+        <file>images/close_btn_split_line.jpg</file>
+        <file>css/default.css</file>
+    </qresource>
+</RCC>
