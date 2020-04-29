@@ -4,5 +4,16 @@
         <file>images/close_btn_bg.jpg</file>
         <file>images/close_btn_split_line.jpg</file>
         <file>css/default.css</file>
+        <file>images/add_btn.jpg</file>
+        <file>images/delete_btn.jpg</file>
+        <file>images/delete_disable_btn.jpg</file>
+        <file>images/empty_download_list_img.jpg</file>
+        <file>images/logo128.jpg</file>
+        <file>images/pause_btn _normal.jpg</file>
+        <file>images/pause_btn_disable.jpg</file>
+        <file>images/start_btn _normal.jpg</file>
+        <file>images/start_btn_disable.jpg</file>
+        <file>images/check_off.png</file>
+        <file>images/check_on.png</file>
     </qresource>
 </RCC>

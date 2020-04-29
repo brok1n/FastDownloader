@@ -1,18 +1,114 @@
 
-#toolsBar {
-    border-left:1px solid #46B9F0;
-    border-right:1px solid #46B9F0;
-    background-color: #BFE1F2;
+/****************************
+* mainWindow style
+**/
+
+#title {
+    background-color: #46B9F0;
 }
 
-#statusBar {
-    border-left:1px solid #46B9F0;
-    border-right:1px solid #46B9F0;
-    border-bottom:1px solid #46B9F0;
-    background-color: #E1ECF2;
+#title QLabel {
+    color: #FFFFFF;
+}
+
+#mainContent {
+    background-color: #F6FBFE;
+}
+
+#downloadList {
+    border:none;
+    background-color: #F6FBFE;
 }
 
 #newTaskBtn {
     border:none;
     background:transparent;
+    image: url(:/fd/images/add_btn.jpg);
 }
+
+#newRightLine {
+    border:none;
+    border-left:1px solid #c0c0c0;
+}
+
+#startAllBtn {
+    border:none;
+    background-color:transparent;
+    image: url(:/fd/images/start_btn _normal.jpg);
+}
+
+#pauseAllBtn {
+    border:none;
+    background-color:transparent;
+    image: url(:/fd/images/pause_btn _normal.jpg);
+}
+
+#toolsBar {
+    background-color: #BFE1F2;
+}
+
+#statusBar {
+    background-color: #E1ECF2;
+}
+
+#lockTopCbox {
+    color: #8d8d8d;
+    spacing: 2px;
+}
+#lockTopCbox::indicator {
+    width: 20px;
+    height: 20px;
+}
+#lockTopCbox::indicator::unchecked {
+    image: url(:/fd/images/check_off.png);
+}
+#lockTopCbox::indicator::checked {
+    image: url(:/fd/images/check_on.png);
+}
+
+/**
+* mainWindow style
+****************************/
+
+
+/****************************
+* newTaskDialog style
+**/
+#NewTaskDialog {
+    background-color:  #F6FBFE;
+}
+
+#newTaskTitle {
+    background-color: #46B9F0;
+}
+
+#newTaskTitle QLabel {
+    color: #FFFFFF;
+}
+
+#newTaskAddrEdit {
+    border: 1px solid #BFE1F2;
+}
+
+#newTaskSaveDirEdit {
+    border: 1px solid #BFE1F2;
+}
+
+#newTaskSelectDirBtn {
+    border: none;
+    background-color: #46B9F0;
+    color: #FFFFFF;
+}
+
+#newTaskBottomBox {
+    background-color: #E3EEF4;
+}
+
+#newTaskDownloadBtn {
+    border: none;
+    background-color: #46B9F0;
+    color: #FFFFFF;
+}
+/**
+* newTaskDialog style
+****************************/

@@ -3,6 +3,7 @@
 
 #include <QMainWindow>
 #include <QMouseEvent>
+#include <QSystemTrayIcon>
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -24,14 +25,15 @@ protected:
 private slots:
     void on_closeBtn_clicked();
     void on_minBtn_clicked();
-
     void on_newTaskBtn_clicked();
+    void on_activitedSystemTrayIcon(QSystemTrayIcon::ActivationReason reason);
 
 private:
     Ui::MainWindow *ui;
     // move window
-    bool moveWindow;
+    bool mMoveWindow;
     //press x,y
-    int pressX, pressY;
+    int mPressX, mPressY;
+    QSystemTrayIcon* mSysTrayIcon;
 };
 #endif // MAINWINDOW_H

@@ -17,13 +17,16 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 SOURCES += \
     main.cpp \
-    mainwindow.cpp
+    mainwindow.cpp \
+    newtaskdialog.cpp
 
 HEADERS += \
-    mainwindow.h
+    mainwindow.h \
+    newtaskdialog.h
 
 FORMS += \
-    mainwindow.ui
+    mainwindow.ui \
+    newtaskdialog.ui
 
 TRANSLATIONS += \
     FastDownloader_en_US.ts

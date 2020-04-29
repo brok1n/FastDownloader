@@ -37,7 +37,7 @@
   <property name="styleSheet">
    <string notr="true">background-color:#FFFFFF;</string>
   </property>
-  <widget class="QWidget" name="centralwidget">
+  <widget class="QWidget" name="mainContent">
    <widget class="QWidget" name="title" native="true">
     <property name="geometry">
      <rect>
@@ -48,7 +48,7 @@
      </rect>
     </property>
     <property name="styleSheet">
-     <string notr="true">background-color: #46B9F0;</string>
+     <string notr="true"/>
     </property>
     <widget class="QLabel" name="label">
      <property name="geometry">
@@ -68,7 +68,7 @@
       </font>
      </property>
      <property name="styleSheet">
-      <string notr="true">color:#FFFFFF;</string>
+      <string notr="true"/>
      </property>
      <property name="text">
       <string>快速下载器</string>
@@ -124,7 +124,7 @@ image: url(:/fd/images/close_btn_bg.jpg);</string>
     <property name="styleSheet">
      <string notr="true"/>
     </property>
-    <widget class="Line" name="line">
+    <widget class="Line" name="newRightLine">
      <property name="geometry">
       <rect>
        <x>40</x>
@@ -140,14 +140,61 @@ image: url(:/fd/images/close_btn_bg.jpg);</string>
     <widget class="QPushButton" name="newTaskBtn">
      <property name="geometry">
       <rect>
-       <x>0</x>
-       <y>0</y>
-       <width>41</width>
-       <height>30</height>
+       <x>10</x>
+       <y>3</y>
+       <width>25</width>
+       <height>25</height>
       </rect>
      </property>
+     <property name="toolTip">
+      <string>新建任务</string>
+     </property>
+     <property name="styleSheet">
+      <string notr="true"/>
+     </property>
      <property name="text">
-      <string>新建</string>
+      <string/>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="startAllBtn">
+     <property name="geometry">
+      <rect>
+       <x>50</x>
+       <y>3</y>
+       <width>25</width>
+       <height>25</height>
+      </rect>
+     </property>
+     <property name="toolTip">
+      <string>开始所有任务</string>
+     </property>
+     <property name="statusTip">
+      <string/>
+     </property>
+     <property name="styleSheet">
+      <string notr="true"/>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="pauseAllBtn">
+     <property name="geometry">
+      <rect>
+       <x>80</x>
+       <y>3</y>
+       <width>25</width>
+       <height>25</height>
+      </rect>
+     </property>
+     <property name="toolTip">
+      <string>暂停所有任务</string>
+     </property>
+     <property name="styleSheet">
+      <string notr="true"/>
+     </property>
+     <property name="text">
+      <string/>
      </property>
     </widget>
    </widget>
@@ -163,8 +210,21 @@ image: url(:/fd/images/close_btn_bg.jpg);</string>
     <property name="styleSheet">
      <string notr="true"/>
     </property>
+    <widget class="QCheckBox" name="lockTopCbox">
+     <property name="geometry">
+      <rect>
+       <x>295</x>
+       <y>12</y>
+       <width>51</width>
+       <height>16</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>固定</string>
+     </property>
+    </widget>
    </widget>
-   <widget class="QListView" name="listView">
+   <widget class="QListView" name="downloadList">
     <property name="geometry">
      <rect>
       <x>0</x>
@@ -174,12 +234,32 @@ image: url(:/fd/images/close_btn_bg.jpg);</string>
      </rect>
     </property>
     <property name="styleSheet">
-     <string notr="true">border-left:1px solid #46B9F0;
-border-right:1px solid #46B9F0;</string>
+     <string notr="true"/>
+    </property>
+   </widget>
+   <widget class="QLabel" name="emptyDownloadImage">
+    <property name="geometry">
+     <rect>
+      <x>59</x>
+      <y>220</y>
+      <width>211</width>
+      <height>191</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+    <property name="pixmap">
+     <pixmap resource="resource.qrc">:/fd/images/empty_download_list_img.jpg</pixmap>
+    </property>
+    <property name="alignment">
+     <set>Qt::AlignCenter</set>
     </property>
    </widget>
   </widget>
  </widget>
- <resources/>
+ <resources>
+  <include location="resource.qrc"/>
+ </resources>
  <connections/>
 </ui>
