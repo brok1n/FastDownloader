@@ -240,7 +240,7 @@ image: url(:/fd/images/close_btn_bg.jpg);</string>
    <widget class="QLabel" name="emptyDownloadImage">
     <property name="geometry">
      <rect>
-      <x>59</x>
+      <x>65</x>
       <y>220</y>
       <width>211</width>
       <height>191</height>

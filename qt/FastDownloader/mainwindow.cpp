@@ -15,6 +15,7 @@ MainWindow::MainWindow(QWidget *parent)
     file.open(QFile::ReadOnly);
     QString style = QLatin1String(file.readAll());
     this->setStyleSheet(style);
+    file.close();
 
     //新建QSystemTrayIcon对象
     mSysTrayIcon = new QSystemTrayIcon(this);
@@ -23,21 +24,46 @@ MainWindow::MainWindow(QWidget *parent)
     //将icon设到QSystemTrayIcon对象中
     mSysTrayIcon->setIcon(icon);
     //当鼠标移动到托盘上的图标时，会显示此处设置的内容
-    mSysTrayIcon->setToolTip(QObject::trUtf8("快速下载器"));
+    mSysTrayIcon->setToolTip(QString("快速下载器"));
     //给QSystemTrayIcon添加槽函数
     connect(mSysTrayIcon,SIGNAL(activated(QSystemTrayIcon::ActivationReason)),this,SLOT(on_activitedSystemTrayIcon(QSystemTrayIcon::ActivationReason)));
 
+    // 托盘菜单
+    mTrayMenu = new QMenu(this);
+    mShowWindowAction = new QAction(mTrayMenu);
+    mExitAppAction = new QAction(mTrayMenu);
+
+    mShowWindowAction->setText("打开");
+    mExitAppAction->setText("退出");
+
+    mTrayMenu->addAction(mShowWindowAction);
+    mTrayMenu->addAction(mExitAppAction);
+
+    connect(mShowWindowAction, SIGNAL(toggled()), this, SLOT(on_showMainWindowAction()));
+    connect(mExitAppAction, SIGNAL(toggled()), this, SLOT(on_ExitAppAction()));
+
+    mSysTrayIcon->setContextMenu(mTrayMenu);
+
     //在系统托盘显示此对象
     mSysTrayIcon->show();
-
+    retranslateUi(this);
 }
-
-
 
 MainWindow::~MainWindow()
 {
+    mApp = NULL;
     mSysTrayIcon->deleteLater( );
     delete ui;
+}
+
+void MainWindow::retranslateUi(QMainWindow*)
+{
+    qDebug("retranslateUi被调用:");
+}
+
+void MainWindow::init(QApplication *app)
+{
+    mApp = app;
 }
 
 void MainWindow::mousePressEvent(QMouseEvent* event)
@@ -59,7 +85,7 @@ void MainWindow::mouseMoveEvent(QMouseEvent *event)
     }
 }
 
-void MainWindow::mouseReleaseEvent(QMouseEvent *event)
+void MainWindow::mouseReleaseEvent(QMouseEvent*)
 {
     mMoveWindow = false;
 }
@@ -101,9 +127,43 @@ void MainWindow::on_activitedSystemTrayIcon(QSystemTrayIcon::ActivationReason re
             break;
         case QSystemTrayIcon::DoubleClick:
             //双击托盘图标
-          this->show();
+            this->show();
+            break;
+        case QSystemTrayIcon::Context:
+            qDebug("请求托盘菜单");
+
+            connect(mShowWindowAction, SIGNAL(triggered()), this, SLOT(on_showMainWindowAction()));
+            connect(mExitAppAction, SIGNAL(triggered()), this, SLOT(on_ExitAppAction()));
+
+            mSysTrayIcon->setContextMenu(mTrayMenu);
+
+
             break;
         default:
             break;
     }
+}
+
+void MainWindow::on_showMainWindowAction()
+{
+    qDebug("show main window action 被触发");
+    this->show();
+}
+
+void MainWindow::on_ExitAppAction()
+{
+    qDebug("exit app action 被触发");
+    mApp->quit();
+}
+
+void MainWindow::on_lockTopCbox_stateChanged(int arg1)
+{
+    if(arg1==2) {
+        setWindowFlags(windowFlags() | Qt::WindowStaysOnTopHint);
+    } else {
+        setWindowFlags(windowFlags() ^ Qt::WindowStaysOnTopHint);
+    }
+    // 修改窗体属性之后，窗体被关闭了 需要重新让窗体显示出来
+    this->show();
+    qDebug(QString("固定复选框被触发:%1").arg(arg1).toUtf8());
 }

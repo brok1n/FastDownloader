@@ -4,6 +4,8 @@
 #include <QMainWindow>
 #include <QMouseEvent>
 #include <QSystemTrayIcon>
+#include <QMenu>
+#include <QAction>
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -16,6 +18,9 @@ class MainWindow : public QMainWindow
 public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
+    void retranslateUi(QMainWindow *MainWindow);
+    void init(QApplication* app);
+
 protected:
     void mousePressEvent(QMouseEvent *event);
     void mouseReleaseEvent(QMouseEvent *event);
@@ -27,6 +32,9 @@ private slots:
     void on_minBtn_clicked();
     void on_newTaskBtn_clicked();
     void on_activitedSystemTrayIcon(QSystemTrayIcon::ActivationReason reason);
+    void on_showMainWindowAction();
+    void on_ExitAppAction();
+    void on_lockTopCbox_stateChanged(int arg1);
 
 private:
     Ui::MainWindow *ui;
@@ -34,6 +42,16 @@ private:
     bool mMoveWindow;
     //press x,y
     int mPressX, mPressY;
+    // 托盘
     QSystemTrayIcon* mSysTrayIcon;
+    // 托盘菜单
+    QMenu * mTrayMenu;
+    // 显示主界面菜单项
+    QAction* mShowWindowAction;
+    // 退出程序菜单项
+    QAction* mExitAppAction;
+    //对QApplication引用
+    QApplication* mApp;
+
 };
 #endif // MAINWINDOW_H
