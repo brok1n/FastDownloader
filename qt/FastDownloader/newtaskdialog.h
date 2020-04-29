@@ -23,6 +23,8 @@ protected:
 private slots:
     void on_newTaskCloseBtn_clicked();
 
+    void on_newTaskDownloadBtn_clicked();
+
 private:
     Ui::NewTaskDialog *ui;
     // move window

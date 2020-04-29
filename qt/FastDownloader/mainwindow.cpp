@@ -39,8 +39,8 @@ MainWindow::MainWindow(QWidget *parent)
     mTrayMenu->addAction(mShowWindowAction);
     mTrayMenu->addAction(mExitAppAction);
 
-    connect(mShowWindowAction, SIGNAL(toggled()), this, SLOT(on_showMainWindowAction()));
-    connect(mExitAppAction, SIGNAL(toggled()), this, SLOT(on_ExitAppAction()));
+    connect(mShowWindowAction, SIGNAL(triggered()), this, SLOT(on_showMainWindowAction()));
+    connect(mExitAppAction, SIGNAL(triggered()), this, SLOT(on_ExitAppAction()));
 
     mSysTrayIcon->setContextMenu(mTrayMenu);
 
@@ -64,6 +64,10 @@ void MainWindow::retranslateUi(QMainWindow*)
 void MainWindow::init(QApplication *app)
 {
     mApp = app;
+    // application icon
+    QIcon icon = QIcon(":/fd/images/logo128.jpg");
+    setWindowIcon(icon);
+    setIconSize(QSize(128, 128));
 }
 
 void MainWindow::mousePressEvent(QMouseEvent* event)
@@ -165,5 +169,4 @@ void MainWindow::on_lockTopCbox_stateChanged(int arg1)
     }
     // 修改窗体属性之后，窗体被关闭了 需要重新让窗体显示出来
     this->show();
-    qDebug(QString("固定复选框被触发:%1").arg(arg1).toUtf8());
 }
