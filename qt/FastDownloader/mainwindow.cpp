@@ -58,7 +58,7 @@ MainWindow::~MainWindow()
 
 void MainWindow::retranslateUi(QMainWindow*)
 {
-    qDebug("retranslateUi被调用:");
+
 }
 
 void MainWindow::init(QApplication *app)
@@ -70,7 +70,14 @@ void MainWindow::init(QApplication *app)
     setIconSize(QSize(128, 128));
 }
 
-void MainWindow::mousePressEvent(QMouseEvent* event)
+void MainWindow::addTask(QString url, QString path)
+{
+    qDebug("下载任务: %s", url.toStdString().c_str());
+    qDebug("保存路径: %s", path.toStdString().c_str());
+    DownloadManager::GetInstance()->downloadFile(url, path);
+}
+
+void MainWindow::mousePressEvent(QMouseEvent *event)
 {
     //在标题栏上才可以移动界面
     if(event->y() < 45) {
@@ -102,13 +109,12 @@ void MainWindow::on_closeBtn_clicked()
 
 void MainWindow::on_minBtn_clicked()
 {
-
+    this->showMinimized();
 }
 
 void MainWindow::on_newTaskBtn_clicked()
 {
-    qDebug("新建按钮被点击");
-    NewTaskDialog* newTaskDialog = new NewTaskDialog(this);
+    NewTaskDialog *newTaskDialog = new NewTaskDialog(this);
     newTaskDialog->setModal(true);
     newTaskDialog->show();
 }
@@ -134,13 +140,11 @@ void MainWindow::on_activitedSystemTrayIcon(QSystemTrayIcon::ActivationReason re
             this->show();
             break;
         case QSystemTrayIcon::Context:
-            qDebug("请求托盘菜单");
 
             connect(mShowWindowAction, SIGNAL(triggered()), this, SLOT(on_showMainWindowAction()));
             connect(mExitAppAction, SIGNAL(triggered()), this, SLOT(on_ExitAppAction()));
 
             mSysTrayIcon->setContextMenu(mTrayMenu);
-
 
             break;
         default:
@@ -150,13 +154,11 @@ void MainWindow::on_activitedSystemTrayIcon(QSystemTrayIcon::ActivationReason re
 
 void MainWindow::on_showMainWindowAction()
 {
-    qDebug("show main window action 被触发");
     this->show();
 }
 
 void MainWindow::on_ExitAppAction()
 {
-    qDebug("exit app action 被触发");
     mApp->quit();
 }
 

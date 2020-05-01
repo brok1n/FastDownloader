@@ -118,6 +118,9 @@ image: url(:/fd/images/close_btn_bg.jpg);</string>
      <height>20</height>
     </rect>
    </property>
+   <property name="focusPolicy">
+    <enum>Qt::StrongFocus</enum>
+   </property>
   </widget>
   <widget class="QLineEdit" name="newTaskSaveDirEdit">
    <property name="geometry">

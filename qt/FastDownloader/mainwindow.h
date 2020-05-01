@@ -6,6 +6,7 @@
 #include <QSystemTrayIcon>
 #include <QMenu>
 #include <QAction>
+#include <downloadmanager.h>
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -19,7 +20,8 @@ public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
     void retranslateUi(QMainWindow *MainWindow);
-    void init(QApplication* app);
+    void init(QApplication *app);
+    void addTask(QString url, QString path);
 
 protected:
     void mousePressEvent(QMouseEvent *event);
@@ -43,15 +45,15 @@ private:
     //press x,y
     int mPressX, mPressY;
     // 托盘
-    QSystemTrayIcon* mSysTrayIcon;
+    QSystemTrayIcon *mSysTrayIcon;
     // 托盘菜单
-    QMenu * mTrayMenu;
+    QMenu *mTrayMenu;
     // 显示主界面菜单项
-    QAction* mShowWindowAction;
+    QAction *mShowWindowAction;
     // 退出程序菜单项
-    QAction* mExitAppAction;
+    QAction *mExitAppAction;
     //对QApplication引用
-    QApplication* mApp;
+    QApplication *mApp;
 
 };
 #endif // MAINWINDOW_H

@@ -20,8 +20,22 @@ NewTaskDialog::NewTaskDialog(QWidget *parent) :
 
     //default download path
     QString defaultPath = QStandardPaths::writableLocation(QStandardPaths::DownloadLocation);
-    qDebug("download path:%s", defaultPath.toStdString().c_str());
     ui->newTaskSaveDirEdit->setText(defaultPath);
+
+    // url edit auto request focus
+    ui->newTaskAddrEdit->setFocus();
+
+    // 如果剪切板里有url，用户可能希望在新建下载任务窗口弹出的时候 自动吧剪切板里的url地址填入下载地址输入框中
+    QClipboard *clipboard = QApplication::clipboard();
+    if(clipboard->mimeData()->hasText()) {
+        QString text = clipboard->text();
+        if(text.contains("://") > 0) {
+            ui->newTaskAddrEdit->setText(clipboard->text());
+        }
+    }
+
+    //为这个窗口安装过滤器
+    QWidget::installEventFilter(this);
 
 }
 
@@ -30,7 +44,7 @@ NewTaskDialog::~NewTaskDialog()
     delete ui;
 }
 
-void NewTaskDialog::mousePressEvent(QMouseEvent* event)
+void NewTaskDialog::mousePressEvent(QMouseEvent *event)
 {
     //in titlebar
     if(event->y() < 45) {
@@ -49,6 +63,27 @@ void NewTaskDialog::mouseMoveEvent(QMouseEvent *event)
     }
 }
 
+bool NewTaskDialog::eventFilter(QObject *watched, QEvent *event)
+{
+    if( watched == this )
+    {
+       //窗口激活
+       if(QEvent::WindowActivate == event->type() && this->ui->newTaskAddrEdit->text().trimmed().size() == 0)
+       {
+           // 如果剪切板里有url，用户可能希望在新建下载任务窗口弹出的时候 自动吧剪切板里的url地址填入下载地址输入框中
+           QClipboard *clipboard = QApplication::clipboard();
+           if(clipboard->mimeData()->hasText()) {
+               QString text = clipboard->text();
+               if(text.contains("://") > 0) {
+                   ui->newTaskAddrEdit->setText(clipboard->text());
+               }
+           }
+           return true ;
+       }
+    }
+    return false ;
+}
+
 void NewTaskDialog::mouseReleaseEvent(QMouseEvent *event)
 {
     mMoveWindow = false;
@@ -65,7 +100,8 @@ void NewTaskDialog::on_newTaskDownloadBtn_clicked()
     QString url = ui->newTaskAddrEdit->text();
     QString path = ui->newTaskSaveDirEdit->text();
 
-    qDebug("download url:%s", url.toStdString().c_str());
-    qDebug("download path:%s", path.toStdString().c_str());
+    ((MainWindow*)parent())->addTask(url, path);
+
+    this->close();
 
 }

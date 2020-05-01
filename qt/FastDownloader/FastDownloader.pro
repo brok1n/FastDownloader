@@ -1,4 +1,4 @@
-QT       += core gui
+QT       += core gui network
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -17,12 +17,14 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 SOURCES += \
     downloadmanager.cpp \
+    downloadtask.cpp \
     main.cpp \
     mainwindow.cpp \
     newtaskdialog.cpp
 
 HEADERS += \
     downloadmanager.h \
+    downloadtask.h \
     mainwindow.h \
     newtaskdialog.h
 
