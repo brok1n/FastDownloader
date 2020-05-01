@@ -16,6 +16,11 @@ class NewTaskDialog : public QDialog
 public:
     explicit NewTaskDialog(QWidget *parent = nullptr);
     ~NewTaskDialog();
+    //重置界面内容
+    void reset();
+    //刷新
+    void refresh();
+
 protected:
     void mousePressEvent(QMouseEvent *event);
     void mouseReleaseEvent(QMouseEvent *event);
@@ -26,8 +31,9 @@ protected:
     bool eventFilter(QObject *o, QEvent *e);
 
 private slots:
+    // 当 取消按钮被点击
     void on_newTaskCloseBtn_clicked();
-
+    // 当 下载按钮被点击
     void on_newTaskDownloadBtn_clicked();
 
 private:

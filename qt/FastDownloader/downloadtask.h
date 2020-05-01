@@ -8,7 +8,11 @@
 #include <QNetworkRequest>
 #include <QClipboard>
 #include <QMimeData>
+#include <QThread>
+#include <QFile>
+#include <QDir>
 
+#include <downloadworker.h>
 class DownloadManager;
 
 class DownloadTask : public QObject
@@ -27,15 +31,32 @@ public:
 
 
 signals:
+    void startDownload();
+
 
 
 private slots:
+    //探测完毕
     void probFinished(QNetworkReply *reply);
 
 
-public:
+private:
     //QNetworkAccessManager
     QNetworkAccessManager *mManager;
+    //QNetworkReply
+    QNetworkReply *mReply;
+    // 下载线程列表
+    QThread *mThread1;
+    QThread *mThread2;
+    QThread *mThread3;
+    QThread *mThread4;
+    QThread *mThread5;
+    //workerl列表
+    DownloadWorker *mWorker1;
+    DownloadWorker *mWorker2;
+    DownloadWorker *mWorker3;
+    DownloadWorker *mWorker4;
+    DownloadWorker *mWorker5;
     // is downloading
     bool mDownloading;
     // is pause
@@ -63,6 +84,7 @@ public:
 
 private:
     DownloadManager *mDownloadManager;
+
     // update progress function (qint64 bytesReceived, qint64 bytesTotal)
     void (*mPupdateProgress)(qint64, qint64);
 //    typeof (void (qint64, qint64)) *mPupdateProgress;

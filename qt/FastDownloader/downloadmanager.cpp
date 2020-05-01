@@ -34,7 +34,7 @@ DownloadManager::DownloadManager(QObject *parent) : QObject(parent)
     mFreeTaskList = new QList<DownloadTask*>();
 }
 
-void DownloadManager::downloadFile(QString url, QString path)
+void DownloadManager::downloadFile(QString url, QString downloadDir)
 {
     DownloadTask *task = Q_NULLPTR;
     if(mFreeTaskList->isEmpty()) {
@@ -43,7 +43,7 @@ void DownloadManager::downloadFile(QString url, QString path)
         task = mFreeTaskList->takeFirst();
     }
     mTaskList->append(task);
-    task->init(url, path);
+    task->init(url, downloadDir);
     task->start();
 }
 

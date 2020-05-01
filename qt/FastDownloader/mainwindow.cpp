@@ -1,16 +1,17 @@
 #include "mainwindow.h"
-#include "newtaskdialog.h"
 #include "ui_mainwindow.h"
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
+    , mNewTaskDialog(Q_NULLPTR)
+    , mUrlWatcherThread(Q_NULLPTR)
+    , mUrlWatcher(Q_NULLPTR)
 {
     ui->setupUi(this);
-    //不显示标题栏，亦无边框
+    //无标题栏 无边框
     setWindowFlags(Qt::Window | Qt::FramelessWindowHint);
-    //设置背景（全透明）
-//    setAttribute(Qt::WA_TranslucentBackground);
+
     QFile file(":/fd/css/default.css");
     file.open(QFile::ReadOnly);
     QString style = QLatin1String(file.readAll());
@@ -47,6 +48,10 @@ MainWindow::MainWindow(QWidget *parent)
     //在系统托盘显示此对象
     mSysTrayIcon->show();
     retranslateUi(this);
+
+    DataCenter::GetInstance(this);
+
+    startUrlWatcher();
 }
 
 MainWindow::~MainWindow()
@@ -70,11 +75,51 @@ void MainWindow::init(QApplication *app)
     setIconSize(QSize(128, 128));
 }
 
-void MainWindow::addTask(QString url, QString path)
+void MainWindow::addTask(QString url, QString downloadDir)
 {
     qDebug("下载任务: %s", url.toStdString().c_str());
-    qDebug("保存路径: %s", path.toStdString().c_str());
-    DownloadManager::GetInstance()->downloadFile(url, path);
+    qDebug("保存路径: %s", downloadDir.toStdString().c_str());
+    DownloadManager::GetInstance()->downloadFile(url, downloadDir);
+}
+
+void MainWindow::startUrlWatcher()
+{
+    if(mUrlWatcherThread == Q_NULLPTR) {
+        mUrlWatcherThread = new QThread();
+    } else {
+        mUrlWatcherThread->quit();
+        mUrlWatcherThread->deleteLater();
+        mUrlWatcherThread = Q_NULLPTR;
+    }
+    if(mUrlWatcherThread->isRunning()) {
+        qDebug("已经在监控了！");
+        return;
+    }
+    if(mUrlWatcher != Q_NULLPTR) {
+        mUrlWatcher->deleteLater();
+        mUrlWatcher = Q_NULLPTR;
+    }
+    mUrlWatcherThread = new QThread();
+    mUrlWatcher = new UrlWatcher();
+    mUrlWatcher->moveToThread(mUrlWatcherThread);
+
+    connect(mUrlWatcherThread, &QThread::finished, mUrlWatcher, &QObject::deleteLater);
+    connect(this, &MainWindow::startUrlWatcherSignal, mUrlWatcher, &UrlWatcher::watcher);
+
+    connect(mUrlWatcher, &UrlWatcher::onUrl, this, &MainWindow::onWatchUrl);
+
+    mUrlWatcherThread->start();
+
+    emit startUrlWatcherSignal();
+
+}
+
+
+void MainWindow::cancelTask(QString url)
+{
+    if(this->mUrlWatcher != Q_NULLPTR) {
+        DataCenter::GetInstance(this)->setCancelUrl(url);
+    }
 }
 
 void MainWindow::mousePressEvent(QMouseEvent *event)
@@ -114,9 +159,14 @@ void MainWindow::on_minBtn_clicked()
 
 void MainWindow::on_newTaskBtn_clicked()
 {
-    NewTaskDialog *newTaskDialog = new NewTaskDialog(this);
-    newTaskDialog->setModal(true);
-    newTaskDialog->show();
+    if(mNewTaskDialog == Q_NULLPTR ) {
+        mNewTaskDialog = new NewTaskDialog(this);
+        mNewTaskDialog->setModal(false);
+    }
+    mNewTaskDialog->reset();
+//    NewTaskDialog *newTaskDialog = new NewTaskDialog(this);
+//    newTaskDialog->setModal(true);1
+    mNewTaskDialog->show();
 }
 
 void MainWindow::on_activitedSystemTrayIcon(QSystemTrayIcon::ActivationReason reason)
@@ -171,4 +221,13 @@ void MainWindow::on_lockTopCbox_stateChanged(int arg1)
     }
     // 修改窗体属性之后，窗体被关闭了 需要重新让窗体显示出来
     this->show();
+}
+
+void MainWindow::onWatchUrl()
+{
+    if(mNewTaskDialog != Q_NULLPTR && mNewTaskDialog->isVisible()) {
+        mNewTaskDialog->refresh();
+    } else {
+        this->on_newTaskBtn_clicked();
+    }
 }

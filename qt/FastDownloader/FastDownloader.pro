@@ -16,17 +16,23 @@ DEFINES += QT_DEPRECATED_WARNINGS
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
+    datacenter.cpp \
     downloadmanager.cpp \
     downloadtask.cpp \
+    downloadworker.cpp \
     main.cpp \
     mainwindow.cpp \
-    newtaskdialog.cpp
+    newtaskdialog.cpp \
+    urlwatcher.cpp
 
 HEADERS += \
+    datacenter.h \
     downloadmanager.h \
     downloadtask.h \
+    downloadworker.h \
     mainwindow.h \
-    newtaskdialog.h
+    newtaskdialog.h \
+    urlwatcher.h
 
 FORMS += \
     mainwindow.ui \

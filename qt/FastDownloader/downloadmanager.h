@@ -16,12 +16,14 @@ class DownloadManager : public QObject
 public:
     ~DownloadManager();
     static DownloadManager* GetInstance(QObject *parent = nullptr);
-
-    void downloadFile(QString url, QString path);
+    //下载一个文件
+    void downloadFile(QString url, QString downloadDir);
+    //下载完毕
     void finished(DownloadTask*);
 
 private:
     explicit DownloadManager(QObject *parent = nullptr);
+    //探测文件，获取文件大小
     long getFileSize(QString url);
 
 signals:
