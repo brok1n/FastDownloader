@@ -55,7 +55,7 @@ void DownloadManager::finished(DownloadTask *task)
 //    mFreeTaskList.append(task);
 }
 
-long DownloadManager::getFileSize(QString url)
+qint64 DownloadManager::getFileSize(QString url)
 {
 //    QNetworkReply *reply = this->mNetAccessManager->get(QNetworkRequest(url));
 

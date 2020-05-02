@@ -39,6 +39,14 @@ private slots:
     //探测完毕
     void probFinished(QNetworkReply *reply);
 
+    void workerFinished(int id);
+    void updateProgress(int id, qint64 recived, qint64 total);
+    void error(int id, int code, QString msg);
+//    void worker2Finished();
+//    void worker3Finished();
+//    void worker4Finished();
+//    void worker5Finished();
+
 
 private:
     //QNetworkAccessManager
@@ -57,6 +65,10 @@ private:
     DownloadWorker *mWorker3;
     DownloadWorker *mWorker4;
     DownloadWorker *mWorker5;
+
+    //downloadFile
+    QFile *mDownloadFile;
+    uchar *mDownloadFileMapPtr;
     // is downloading
     bool mDownloading;
     // is pause
@@ -72,7 +84,7 @@ private:
     // local full path
     QString mLocalPath;
     // file size
-    long mFileSize;
+    qint64 mFileSize;
     // split count
     int mSplitCount;
     // download max speed

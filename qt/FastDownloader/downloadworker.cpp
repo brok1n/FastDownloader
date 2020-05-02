@@ -5,20 +5,37 @@ DownloadWorker::~DownloadWorker()
 
 }
 
-
-DownloadWorker::DownloadWorker()
-    : mReply(Q_NULLPTR)
+DownloadWorker::DownloadWorker(int id)
+    : mId(id)
+    , mReply(Q_NULLPTR)
+    , mDownloadIndex(0)
     , mUrl("")
+    , mDownloadFile(Q_NULLPTR)
     , mMptr(Q_NULLPTR)
     , mStart(0)
     , mEnd(0)
     , mDownloadFinished(true)
     , mWaitForDownload(false)
+    , mEventLoop(Q_NULLPTR)
+
 {
 
 }
 
-void DownloadWorker::download(QString url, uchar *mptr, long start, long end)
+void DownloadWorker::download(QString url, QFile *downloadFile, qint64 start, qint64 end)
+{
+    if( !mDownloadFinished ) {
+        return;
+    }
+    this->mUrl = url;
+    this->mDownloadFile = downloadFile;
+    this->mStart = start;
+    this->mEnd = end;
+    mWaitForDownload = true;
+    qDebug(QString("下载Worker:%1-%2 %3 即将开始下载").arg(mStart).arg(mEnd).arg(mUrl).toUtf8());
+}
+
+void DownloadWorker::download(QString url, uchar *mptr, qint64 start, qint64 end)
 {
     if( !mDownloadFinished ) {
         return;
@@ -33,7 +50,8 @@ void DownloadWorker::download(QString url, uchar *mptr, long start, long end)
 
 void DownloadWorker::start()
 {
-     this->mManager = new QNetworkAccessManager();
+    this->mEventLoop = new QEventLoop();
+    this->mManager = new QNetworkAccessManager();
     while (true) {
         if( mWaitForDownload && !mUrl.isEmpty() && mEnd > 0) {
             mWaitForDownload = false;
@@ -44,92 +62,62 @@ void DownloadWorker::start()
             mReply = mManager->get(requests);
             qDebug(QString("下载Worker:%1-%2 %3 开始下载...").arg(mStart).arg(mEnd).arg(mUrl).toUtf8());
 
-//            connect(mReply, SIGNAL(downloadProgress(qint64, qint64)), this, SLOT(downloadProgress(qint64, qint64)));
+//            connect(mManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(mfinished(QNetworkReply*)), Qt::DirectConnection);
 
-//            connect(mReply, SIGNAL(encrypted()), this, SLOT(encrypted()));
+            connect(mReply, SIGNAL(downloadProgress(qint64, qint64)), this, SLOT(downloadProgress(qint64, qint64)));
 
-//            connect(mReply, SIGNAL(error(QNetworkReply::NetworkError)), this, SLOT(error(QNetworkReply::NetworkError)));
+            connect(mReply, SIGNAL(error(QNetworkReply::NetworkError)), this, SLOT(error(QNetworkReply::NetworkError)));
 
-//            connect(mReply, SIGNAL(finished()), this, SLOT(rfinished()));
-            connect(mManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(mfinished(QNetworkReply*)));
+            connect(mReply, SIGNAL(finished()), this, SLOT(rfinished()));
 
-//            connect(mReply, SIGNAL(metaDataChanged()), this, SLOT(metaDataChanged()));
-//            connect(mReply, SIGNAL(readyRead()), this, SLOT(readyRead()));
+            connect(mReply, SIGNAL(readyRead()), this, SLOT(readyRead()));
 
+            mEventLoop->exec(QEventLoop::ExcludeUserInputEvents);
+
+            qDebug("event loop 结束");
         }
         QThread::sleep(1);
     }
-
-
-
-//    connect(mReply, SIGNAL(downloadProgress(qint64, qint64)), this, SLOT(downloadProgress(qint64, qint64)));
-
-//    connect(mReply, SIGNAL(redirected(const QUrl &url)), this, SLOT(redirected(const QUrl &url)));
-
-//    connect(mReply, SIGNAL(sslErrors(const QList<QSslError> &errors)), this, SLOT(sslErrors(const QList<QSslError> &errors)));
-
-//    connect(mReply, SIGNAL(encrypted()), this, SLOT(encrypted()));
-
-//    connect(mReply, SIGNAL(error(QNetworkReply::NetworkError)), this, SLOT(error(QNetworkReply::NetworkError)));
-
-//    connect(mReply, SIGNAL(finished()), this, SLOT(rfinished()));
-//    connect(mManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(mfinished(QNetworkReply*)));
-
-//    connect(mReply, SIGNAL(metaDataChanged()), this, SLOT(metaDataChanged()));
-//    connect(mReply, SIGNAL(readyRead()), this, SLOT(readyRead()));
-
-
-    //等待下载完毕才关闭线程
-//    while( !mDownloadFinished ) {
-//        qDebug("等待下载完毕");
-//        QThread::sleep(1);
-//    }
 
 }
 
 void DownloadWorker::downloadProgress(qint64 bytesReceived, qint64 bytesTotal)
 {
-    qDebug("total:%lld, read:%lld  percent:%f", bytesTotal, bytesReceived, bytesTotal / bytesReceived);
-}
-
-//void DownloadWorker::redirected(const QUrl &url)
-//{
-//    qDebug("redirected:%s", url.url().toStdString().c_str());
-//}
-
-//void DownloadWorker::sslErrors(const QList<QSslError> &errors)
-//{
-//    qDebug() << "__________" + errors.at(0).errorString();
-//}
-
-void DownloadWorker::encrypted()
-{
-    qDebug("encrypted");
+    qDebug("total:%lld, read:%d  percent:%f", bytesTotal, bytesReceived, (double)bytesReceived / (double)bytesTotal);
+    emit this->updateProgress(mId, bytesReceived, bytesTotal);
 }
 
 void DownloadWorker::error(QNetworkReply::NetworkError err)
 {
     QString strError = mReply->errorString();
      qDebug() << "__________" + strError;
+     emit this->error(mId, mReply->error(), "下载失败！");
 }
 
 void DownloadWorker::rfinished()
 {
     qDebug("rfinished no params");
+
+    disconnect(mReply, SIGNAL(downloadProgress(qint64, qint64)), this, SLOT(downloadProgress(qint64, qint64)));
+
+    disconnect(mReply, SIGNAL(error(QNetworkReply::NetworkError)), this, SLOT(error(QNetworkReply::NetworkError)));
+
+    disconnect(mReply, SIGNAL(finished()), this, SLOT(rfinished()));
+
+    disconnect(mReply, SIGNAL(readyRead()), this, SLOT(readyRead()));
+
+    mEventLoop->quit();
+
+    emit this->workerFinished(mId);
 }
 
-void DownloadWorker::mfinished(QNetworkReply *reply)
-{
-    qDebug("finished QNetworkReply");
-}
-
-void DownloadWorker::metaDataChanged()
-{
-    qDebug("metaDataChanged");
-}
 
 void DownloadWorker::readyRead()
 {
-    qDebug("readyRead");
-    mReply->readAll();
+    auto data = mReply->readAll();
+//    qDebug("--------------readyRead read len:%d", data.size());
+    for(int i = 0;i < data.size(); i++) {
+        mMptr[mDownloadIndex++] = data.at(i);
+    }
+    // ----------------1------------------
 }

@@ -24,7 +24,7 @@ public:
 private:
     explicit DownloadManager(QObject *parent = nullptr);
     //探测文件，获取文件大小
-    long getFileSize(QString url);
+    qint64 getFileSize(QString url);
 
 signals:
 
