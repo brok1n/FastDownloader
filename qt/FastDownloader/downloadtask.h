@@ -10,6 +10,7 @@
 #include <QMimeData>
 #include <QThread>
 #include <QFile>
+#include <QFileInfo>
 #include <QDir>
 
 #include <downloadworker.h>
@@ -27,6 +28,8 @@ public:
     void stop();
     void remove();
 
+    //这个task是否是空闲的
+    bool isFree();
 
 
 
@@ -54,6 +57,8 @@ private:
     //QNetworkReply
     QNetworkReply *mReply;
     // 下载线程列表
+    QList<QThread*> *mDownloadThreadList;
+    QList<DownloadWorker*> *mDownloadWorkerList;
     QThread *mThread1;
     QThread *mThread2;
     QThread *mThread3;
@@ -66,7 +71,15 @@ private:
     DownloadWorker *mWorker4;
     DownloadWorker *mWorker5;
 
+    // 线程数
+    int mWorkerCount;
+    //完成线程id和
+    int mWorkerIdSum;
+    int mFinishedWorkerIdSum;
+
     //downloadFile
+    QString mDownloadFullPath;
+    QString mDownloadFullPathTemp;
     QFile *mDownloadFile;
     uchar *mDownloadFileMapPtr;
     // is downloading
@@ -85,8 +98,6 @@ private:
     QString mLocalPath;
     // file size
     qint64 mFileSize;
-    // split count
-    int mSplitCount;
     // download max speed
     long mMaxSpeed;
     // download min speed  default is 0 ignore 0

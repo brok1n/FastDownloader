@@ -5,8 +5,8 @@ QMutex  DownloadManager::mMutex;
 
 DownloadManager::~DownloadManager()
 {
-    mFreeTaskList->clear();
-    mFreeTaskList = NULL;
+//    mFreeTaskList->clear();
+//    mFreeTaskList = NULL;
     mTaskList->clear();
     mTaskList = NULL;
     this->mNetAccessManager->deleteLater();
@@ -31,27 +31,41 @@ DownloadManager::DownloadManager(QObject *parent) : QObject(parent)
     //QNetworkAccessManager
     this->mNetAccessManager = new QNetworkAccessManager(this);
     mTaskList = new QList<DownloadTask*>();
-    mFreeTaskList = new QList<DownloadTask*>();
+//    mFreeTaskList = new QList<DownloadTask*>();
 }
 
 void DownloadManager::downloadFile(QString url, QString downloadDir)
 {
     DownloadTask *task = Q_NULLPTR;
-    if(mFreeTaskList->isEmpty()) {
-        task = new DownloadTask(this->mNetAccessManager, this);
-    } else {
-        task = mFreeTaskList->takeFirst();
+    for( int i = 0; i < mTaskList->size(); i ++) {
+        if(mTaskList->at(i)->isFree()) {
+            task = mTaskList->at(i);
+            continue;
+        }
     }
-    mTaskList->append(task);
+    if(task == Q_NULLPTR) {
+        task = new DownloadTask(this->mNetAccessManager, this);
+        mTaskList->append(task);
+    }
+//    if(mFreeTaskList->isEmpty()) {
+//        task = new DownloadTask(this->mNetAccessManager, this);
+//    } else {
+//        task = mFreeTaskList->takeFirst();
+//    }
+
     task->init(url, downloadDir);
     task->start();
 }
 
 void DownloadManager::finished(DownloadTask *task)
 {
-    mTaskList->removeAll(task);
-    mFreeTaskList->append(task);
-//    mTaskList.removeOne(task);
+    qDebug("download manager finished!!!!!!");
+    qDebug("download task list size:%d", mTaskList->size());
+//    mTaskList->removeAll(task);
+//    mFreeTaskList->append(task);
+
+//    mTaskList->removeOne(task);
+    qDebug("download task list size:%d", mTaskList->size());
 //    mFreeTaskList.append(task);
 }
 

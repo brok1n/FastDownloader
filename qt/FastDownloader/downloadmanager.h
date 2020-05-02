@@ -48,7 +48,7 @@ private:
     QNetworkAccessManager *mNetAccessManager;
     // task list
     QList<DownloadTask*> *mTaskList;
-    QList<DownloadTask*> *mFreeTaskList;
+//    QList<DownloadTask*> *mFreeTaskList;
 
 
 };
