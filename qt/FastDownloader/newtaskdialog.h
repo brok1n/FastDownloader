@@ -35,6 +35,8 @@ private slots:
     void on_newTaskCloseBtn_clicked();
     // 当 下载按钮被点击
     void on_newTaskDownloadBtn_clicked();
+    // 选择下载文件夹按钮被点击
+    void on_newTaskSelectDirBtn_clicked();
 
 private:
     Ui::NewTaskDialog *ui;

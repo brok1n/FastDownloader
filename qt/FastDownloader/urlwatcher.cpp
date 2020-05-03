@@ -6,7 +6,7 @@ UrlWatcher::UrlWatcher(QObject *parent) : QObject(parent)
 
 void UrlWatcher::watcher()
 {
-    DataCenter *dc = DataCenter::GetInstance(this);
+    DataCenter *dc = DataCenter::GetInstance();
     while (dc->urlWatcherIsRunning()) {
         QThread::msleep(600);
         QClipboard *clipboard = QApplication::clipboard();

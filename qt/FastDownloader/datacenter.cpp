@@ -103,17 +103,17 @@ void DataCenter::initWatchTypeList()
 
 DataCenter::~DataCenter()
 {
-
+    this->deleteLater();
 }
 
-DataCenter *DataCenter::GetInstance(QObject *parent)
+DataCenter *DataCenter::GetInstance()
 {
     if (mInstance == nullptr)
     {
         QMutexLocker locker(&mMutex);
         if (mInstance == nullptr)
         {
-            mInstance = new DataCenter(parent);
+            mInstance = new DataCenter();
         }
     }
     return mInstance;

@@ -28,7 +28,8 @@ MainWindow::MainWindow(QWidget *parent)
     setWindowIcon(appIcon);
     setIconSize(QSize(128, 128));
 
-    DataCenter::GetInstance(this);
+    DataCenter::GetInstance();
+    DownloadManager::GetInstance();
 
     startUrlWatcher();
 
@@ -63,20 +64,6 @@ void MainWindow::addTask(QString url, QString downloadDir)
     listItem->bindDownloadTask(task);
     task->bindUi(listItem);
     this->ui->downloadList->setItemWidget(qItem, listItem);
-
-
-
-//    DownloadTask *task2 = DownloadManager::GetInstance()->downloadFile(url, downloadDir, false);
-
-//    QListWidgetItem *qItem2 = new QListWidgetItem(this->ui->downloadList);
-//    qItem2->setBackground(QColor(222, 237, 252));
-//    qItem2->setSizeHint(QSize(350, 55));
-
-//    DownloadItemUi *listItem2 = new DownloadItemUi(this->ui->downloadList);
-//    listItem2->show();
-//    listItem2->bindDownloadTask(task2);
-//    task2->bindUi(listItem2);
-//    this->ui->downloadList->setItemWidget(qItem2, listItem2);
 
 
     if(this->ui->emptyDownloadImage->isVisible()) {
@@ -121,7 +108,7 @@ void MainWindow::startUrlWatcher()
 void MainWindow::cancelTask(QString url)
 {
     if(this->mUrlWatcher != Q_NULLPTR) {
-        DataCenter::GetInstance(this)->setCancelUrl(url);
+        DataCenter::GetInstance()->setCancelUrl(url);
     }
 }
 

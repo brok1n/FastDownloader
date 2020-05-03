@@ -12,16 +12,18 @@ DownloadManager::~DownloadManager()
     mTaskList = NULL;
     this->mNetAccessManager->deleteLater();
     this->mNetAccessManager = Q_NULLPTR;
+
+    this->deleteLater();
 }
 
-DownloadManager *DownloadManager::GetInstance(QObject *parent)
+DownloadManager *DownloadManager::GetInstance()
 {
     if (mInstance == nullptr)
     {
         QMutexLocker locker(&mMutex);
         if (mInstance == nullptr)
         {
-            mInstance = new DownloadManager(parent);
+            mInstance = new DownloadManager();
         }
     }
     return mInstance;
@@ -32,11 +34,14 @@ DownloadManager::DownloadManager(QObject *parent) : QObject(parent)
     //QNetworkAccessManager
     this->mNetAccessManager = new QNetworkAccessManager(this);
     mTaskList = new QList<DownloadTask*>();
-//    mFreeTaskList = new QList<DownloadTask*>();
+    this->mDownloadPath =  QStandardPaths::writableLocation(QStandardPaths::DownloadLocation);
 }
 
 DownloadTask* DownloadManager::downloadFile(QString url, QString downloadDir, bool multiple)
 {
+    // save last download path
+    this->mDownloadPath = downloadDir;
+
     DownloadTask *task = Q_NULLPTR;
     for( int i = 0; i < mTaskList->size(); i ++) {
         if(mTaskList->at(i)->isFree()) {
@@ -62,7 +67,12 @@ void DownloadManager::finished(DownloadTask *task)
 
 //    mTaskList->removeOne(task);
     qDebug("download task list size:%d", mTaskList->size());
-//    mFreeTaskList.append(task);
+    //    mFreeTaskList.append(task);
+}
+
+QString DownloadManager::getDownloadPath()
+{
+    return this->mDownloadPath;
 }
 
 qint64 DownloadManager::getFileSize(QString url)

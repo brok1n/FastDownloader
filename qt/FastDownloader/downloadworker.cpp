@@ -119,19 +119,13 @@ void DownloadWorker::rfinished()
     mDownloadFinished = true;
 
     emit this->workerFinished(mId);
-
 }
 
 
 void DownloadWorker::readyRead()
 {
-    mDownloadIndex = mEnd;
     auto data = mReply->readAll();
-//    for(int i = 0;i < data.size(); i++) {
-    qDebug("index:%lld", mDownloadIndex);
-    mMptr[100000] = 0;
-//    mMptr[mDownloadIndex] = 0;
-//    for(qint64 i = 0;i < 1; i++) {
-//        mMptr[mDownloadIndex++] = data.at(i);
-//    }
+    for(qint64 i = 0;i < data.size(); i++) {
+        mMptr[mDownloadIndex++] = data.at(i);
+    }
 }

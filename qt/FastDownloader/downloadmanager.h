@@ -13,11 +13,13 @@ class DownloadManager : public QObject
     Q_OBJECT
 public:
     ~DownloadManager();
-    static DownloadManager* GetInstance(QObject *parent = nullptr);
+    static DownloadManager* GetInstance();
     //下载一个文件
     DownloadTask* downloadFile(QString url, QString downloadDir, bool multiple=true);
     //下载完毕
     void finished(DownloadTask*);
+    //默认下载路径
+    QString getDownloadPath();
 
 private:
     explicit DownloadManager(QObject *parent = nullptr);
@@ -47,7 +49,8 @@ private:
     // task list
     QList<DownloadTask*> *mTaskList;
 //    QList<DownloadTask*> *mFreeTaskList;
-
+    // download path  dir
+    QString mDownloadPath;
 
 };
 

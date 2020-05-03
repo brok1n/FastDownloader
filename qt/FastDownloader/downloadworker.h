@@ -29,12 +29,8 @@ public slots:
     void start();
 
     void downloadProgress(qint64 bytesReceived, qint64 bytesTotal);
-//    void redirected(const QUrl &url);
-//    void sslErrors(const QList<QSslError> &errors);
-//    void encrypted();
     void error(QNetworkReply::NetworkError);
     void rfinished();
-//    void mfinished(QNetworkReply*);
     void readyRead();
 
 

@@ -2,6 +2,7 @@
 #include "ui_newtaskdialog.h"
 
 #include <QDir>
+#include <QFileDialog>
 #include <QStandardPaths>
 
 NewTaskDialog::NewTaskDialog(QWidget *parent) :
@@ -11,33 +12,17 @@ NewTaskDialog::NewTaskDialog(QWidget *parent) :
     ui->setupUi(this);
     //no titlebar no border
     setWindowFlags(Qt::Window | Qt::FramelessWindowHint | Qt::WindowStaysOnTopHint);
-    // if main window fixed on top
-//    int hasTopHint = parent->windowFlags() & Qt::WindowStaysOnTopHint;
-//    if(hasTopHint > 1) {
-//        qDebug("main window fixed on top");
-//        setWindowFlags(windowFlags() | Qt::WindowStaysOnTopHint);
-//    }
 
     //default download path
-    QString defaultPath = QStandardPaths::writableLocation(QStandardPaths::DownloadLocation);
+    QString defaultPath = DownloadManager::GetInstance()->getDownloadPath();
+
     ui->newTaskSaveDirEdit->setText(defaultPath);
 
     // url edit auto request focus
     ui->newTaskAddrEdit->setFocus();
 
-    // 如果剪切板里有url，用户可能希望在新建下载任务窗口弹出的时候 自动吧剪切板里的url地址填入下载地址输入框中
-//    QClipboard *clipboard = QApplication::clipboard();
-//    if(clipboard->mimeData()->hasText()) {
-//        QString text = clipboard->text();
-//        if(text.contains("://") > 0) {
-//            ui->newTaskAddrEdit->setText(clipboard->text());
-//        }
-//    }
-
     //为这个窗口安装过滤器
     QWidget::installEventFilter(this);
-
-
 }
 
 NewTaskDialog::~NewTaskDialog()
@@ -123,4 +108,19 @@ void NewTaskDialog::on_newTaskDownloadBtn_clicked()
 
     this->close();
 
+}
+
+void NewTaskDialog::on_newTaskSelectDirBtn_clicked()
+{
+    //文件夹路径
+    QString srcDirPath = QFileDialog::getExistingDirectory(this, "要下载到什么文件夹?", DownloadManager::GetInstance()->getDownloadPath());
+
+    if (srcDirPath.isEmpty())
+    {
+        ui->newTaskSaveDirEdit->setText(DownloadManager::GetInstance()->getDownloadPath());
+    }
+    else
+    {
+        ui->newTaskSaveDirEdit->setText(srcDirPath);
+    }
 }

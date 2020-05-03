@@ -12,7 +12,7 @@ private:
 
 public:
     ~DataCenter();
-    static DataCenter* GetInstance(QObject *parent = nullptr);
+    static DataCenter* GetInstance();
 
 signals:
 
