@@ -52,6 +52,11 @@ void DownloadWorker::download(QString url, uchar *mptr, qint64 start, qint64 end
     qDebug(QString("%1 下载Worker:%2-%3 %4 即将开始下载").arg(mId).arg(mStart).arg(mEnd).arg(mUrl).toUtf8());
 }
 
+int DownloadWorker::id()
+{
+    return this->mId;
+}
+
 void DownloadWorker::start()
 {
     this->mEventLoop = new QEventLoop();
@@ -120,10 +125,13 @@ void DownloadWorker::rfinished()
 
 void DownloadWorker::readyRead()
 {
+    mDownloadIndex = mEnd;
     auto data = mReply->readAll();
-//    qDebug("--------------readyRead read len:%d", data.size());
-    for(int i = 0;i < data.size(); i++) {
-        mMptr[mDownloadIndex++] = data.at(i);
-    }
-    // ----------------1------------------
+//    for(int i = 0;i < data.size(); i++) {
+    qDebug("index:%lld", mDownloadIndex);
+    mMptr[100000] = 0;
+//    mMptr[mDownloadIndex] = 0;
+//    for(qint64 i = 0;i < 1; i++) {
+//        mMptr[mDownloadIndex++] = data.at(i);
+//    }
 }

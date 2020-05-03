@@ -17,6 +17,7 @@ public:
     explicit DownloadWorker(int id);
     void download(QString url, QFile *downloadFile, qint64 start, qint64 end);
     void download(QString url, uchar *mptr, qint64 start, qint64 end);
+    int  id();
 
 signals:
     void workerFinished(int id);
@@ -35,9 +36,6 @@ public slots:
     void rfinished();
 //    void mfinished(QNetworkReply*);
     void readyRead();
-
-
-private:
 
 
 private:

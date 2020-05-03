@@ -1,8 +1,6 @@
 #ifndef DOWNLOADMANAGER_H
 #define DOWNLOADMANAGER_H
 
-#include "downloadtask.h"
-
 #include <QNetworkAccessManager>
 #include <QObject>
 #include <QStandardPaths>
@@ -17,7 +15,7 @@ public:
     ~DownloadManager();
     static DownloadManager* GetInstance(QObject *parent = nullptr);
     //下载一个文件
-    void downloadFile(QString url, QString downloadDir);
+    DownloadTask* downloadFile(QString url, QString downloadDir, bool multiple=true);
     //下载完毕
     void finished(DownloadTask*);
 

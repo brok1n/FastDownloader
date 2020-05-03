@@ -1,4 +1,5 @@
 #include "downloadmanager.h"
+#include "downloadtask.h"
 
 DownloadManager* DownloadManager::mInstance = nullptr;
 QMutex  DownloadManager::mMutex;
@@ -34,7 +35,7 @@ DownloadManager::DownloadManager(QObject *parent) : QObject(parent)
 //    mFreeTaskList = new QList<DownloadTask*>();
 }
 
-void DownloadManager::downloadFile(QString url, QString downloadDir)
+DownloadTask* DownloadManager::downloadFile(QString url, QString downloadDir, bool multiple)
 {
     DownloadTask *task = Q_NULLPTR;
     for( int i = 0; i < mTaskList->size(); i ++) {
@@ -47,14 +48,9 @@ void DownloadManager::downloadFile(QString url, QString downloadDir)
         task = new DownloadTask(this->mNetAccessManager, this);
         mTaskList->append(task);
     }
-//    if(mFreeTaskList->isEmpty()) {
-//        task = new DownloadTask(this->mNetAccessManager, this);
-//    } else {
-//        task = mFreeTaskList->takeFirst();
-//    }
-
-    task->init(url, downloadDir);
+    task->init(url, downloadDir, multiple);
     task->start();
+    return task;
 }
 
 void DownloadManager::finished(DownloadTask *task)

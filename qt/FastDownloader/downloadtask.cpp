@@ -1,7 +1,9 @@
 #include "downloadtask.h"
+#include "downloaditemui.h"
 
 DownloadTask::DownloadTask(QNetworkAccessManager *manager, DownloadManager *parent)
     : QObject(parent)
+    , mUi(Q_NULLPTR)
     , mReply(Q_NULLPTR)
     , mDownloadThreadList(new QList<QThread*>())
     , mDownloadWorkerList(new QList<DownloadWorker*>())
@@ -16,13 +18,16 @@ DownloadTask::DownloadTask(QNetworkAccessManager *manager, DownloadManager *pare
     , mWorker3(new DownloadWorker(3))
     , mWorker4(new DownloadWorker(4))
     , mWorker5(new DownloadWorker(5))
+    , mMultipleThread(true)
     , mWorkerCount(5)
     , mWorkerIdSum(0)
     , mFinishedWorkerIdSum(0)
+    , mPercent(Q_NULLPTR)
     , mDownloadFullPath("")
     , mDownloadFullPathTemp("")
     , mDownloadFile(Q_NULLPTR)
     , mDownloadFileMapPtr(Q_NULLPTR)
+    , mCompletected(false)
 {
     this->mManager = manager;
     this->mDownloadManager = parent;
@@ -39,8 +44,9 @@ DownloadTask::DownloadTask(QNetworkAccessManager *manager, DownloadManager *pare
     mThread4->start();
     mThread5->start();
 
+    mPercent = new int[mWorkerCount]();
     for( int i = 1; i <= mWorkerCount; i ++ ) {
-       mWorkerIdSum += i;
+        mPercent[i] = 0;
        QThread *thread = new QThread();
        DownloadWorker *worker = new DownloadWorker(i);
        worker->moveToThread(thread);
@@ -64,10 +70,11 @@ DownloadTask::DownloadTask(QNetworkAccessManager *manager, DownloadManager *pare
     this->mRemove = false;
 }
 
-void DownloadTask::init(QString url, QString path)
+void DownloadTask::init(QString url, QString path, bool multiple)
 {
     this->mUrl = url;
     this->mLocalPath = path;
+    this->mMultipleThread = multiple;
 
     this->mDownloading = false;
     this->mStop = false;
@@ -75,6 +82,7 @@ void DownloadTask::init(QString url, QString path)
     this->mRemove = false;
     this->mCompletected = false;
     //完成线程id和
+    this->mWorkerIdSum = 0;
     this->mFinishedWorkerIdSum = 0;
 
     //downloadFile
@@ -135,6 +143,15 @@ void DownloadTask::stop()
 void DownloadTask::remove()
 {
 
+}
+
+void DownloadTask::bindUi(DownloadItemUi *ui)
+{
+    mUi = ui;
+    connect(this, SIGNAL(onParseName(QString)), ui, SLOT(onParseName(QString)));
+    connect(this, SIGNAL(onSingleDownload()), ui, SLOT(onSingleDownload()));
+    connect(this, SIGNAL(onMultipleDownload()), ui, SLOT(onMultipleDownload()) );
+    connect(this, SIGNAL(onUpdateProgress(int*, int)), ui, SLOT(onUpdateProgress(int*, int)));
 }
 
 bool DownloadTask::isFree()
@@ -199,6 +216,10 @@ void DownloadTask::probFinished(QNetworkReply *)
         filename = qurl->fileName();
     }
 
+    // 解析到名字 就把名字显示在界面上
+    qDebug("设置名字");
+    emit onParseName(filename);
+
     mDownloadFullPath = mLocalPath + QDir::separator() + filename;
     mDownloadFullPath = getAvaliableFilePath(mDownloadFullPath);
     mDownloadFullPathTemp = mDownloadFullPath + ".tmp";
@@ -207,15 +228,22 @@ void DownloadTask::probFinished(QNetworkReply *)
     qDebug("本地文件临时路径:%s", mDownloadFullPathTemp.toStdString().c_str());
 
     QStringList strList = contentRange.split("/");
-    if(strList.size() == 2) {
-        qDebug("支持断点续传！");
+    if(mMultipleThread && strList.size() == 2) {
+        qDebug("多线程下载");
         mFileSize = strList.at(1).toDouble();
         qDebug("文件大小:%lld", mFileSize);
+
+        //通知 多线程下载
+        emit onMultipleDownload();
 
         mDownloadFile = new QFile(mDownloadFullPathTemp);
         mDownloadFile->resize(mFileSize);
         mDownloadFile->open(QIODevice::ReadWrite);
+        mDownloadFile->flush();
+        mDownloadFile->close();
 
+        mDownloadFile = new QFile(mDownloadFullPathTemp);
+        mDownloadFile->open(QIODevice::ReadWrite);
         mDownloadFileMapPtr = mDownloadFile->map(0, mFileSize);
 
         mWorkerCount = mDownloadWorkerList->size();
@@ -225,6 +253,7 @@ void DownloadTask::probFinished(QNetworkReply *)
         qint64 blockMod = mFileSize % mWorkerCount;
         for(int i = 0; i < mWorkerCount; i ++) {
             DownloadWorker *worker = mDownloadWorkerList->at(i);
+            this->mWorkerIdSum += worker->id();
             start = i * block;
             end = start + block;
             if(i > 0) {
@@ -240,16 +269,24 @@ void DownloadTask::probFinished(QNetworkReply *)
             connect(worker, SIGNAL(workerFinished(int)), this, SLOT(workerFinished(int)));
         }
     } else {
-        qDebug("不支持断点续传! 文件大小:%lld", mFileSize);
+        qDebug("单线程下载! 文件大小:%lld", mFileSize);
+
+        //通知 单线程下载
+        emit onSingleDownload();
 
         mDownloadFile = new QFile(mDownloadFullPathTemp);
         mDownloadFile->resize(mFileSize);
         mDownloadFile->open(QIODevice::ReadWrite);
+        mDownloadFile->flush();
+        mDownloadFile->close();
 
+        mDownloadFile = new QFile(mDownloadFullPathTemp);
+        mDownloadFile->open(QIODevice::ReadWrite);
         mDownloadFileMapPtr = mDownloadFile->map(0, mFileSize);
 
-        //不支持断点续传，就只能单个线程直接下载
+        //不支持断点续传 或者控制单线程下载，就只能单个线程直接下载
         DownloadWorker *worker = mDownloadWorkerList->at(0);
+        this->mWorkerIdSum += worker->id();
         worker->download(mUrl, mDownloadFileMapPtr, 0, mFileSize);
         connect(worker, SIGNAL(updateProgress(int, qint64, qint64)), this, SLOT(updateProgress(int, qint64, qint64)));
         connect(worker, SIGNAL(error(int, int, QString)), this, SLOT(error(int, int, QString)));
@@ -291,6 +328,16 @@ void DownloadTask::workerFinished(int id)
 
         mCompletected = true;
 
+        //释放信号连接
+        disconnect(this, SIGNAL(onParseName(QString)), mUi, SLOT(onParseName(QString)));
+        disconnect(this, SIGNAL(onSingleDownload()), mUi, SLOT(onSingleDownload()));
+        disconnect(this, SIGNAL(onMultipleDownload()), mUi, SLOT(onMultipleDownload()) );
+        disconnect(this, SIGNAL(onUpdateProgress(int*, int)), mUi, SLOT(onUpdateProgress(int*, int)));
+
+        for(int i = 0; i < mWorkerCount; i++) {
+            mPercent[i] = 0;
+        }
+
 //        QFile file(mDownloadFullPathTemp);
 //        file.rename(mDownloadFullPath);
 //        file.close();
@@ -302,7 +349,11 @@ void DownloadTask::workerFinished(int id)
 
 void DownloadTask::updateProgress(int id, qint64 recived, qint64 total)
 {
-    qDebug("%d - :%d", id, (int)(recived / (double)total * 100));
+    int percent = (int)(recived / (double)total * 100);
+    qDebug("%d - :%d", id, percent);
+    mPercent[id-1] = percent;
+    emit onUpdateProgress(mPercent, mWorkerCount);
+
 }
 
 void DownloadTask::error(int id, int code, QString msg)

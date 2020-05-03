@@ -224,7 +224,7 @@ image: url(:/fd/images/close_btn_bg.jpg);</string>
      </property>
     </widget>
    </widget>
-   <widget class="QListView" name="downloadList">
+   <widget class="QListWidget" name="downloadList">
     <property name="geometry">
      <rect>
       <x>0</x>

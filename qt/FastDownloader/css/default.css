@@ -7,7 +7,7 @@
     background-color: #46B9F0;
 }
 
-#title QLabel {
+#title .QLabel {
     color: #FFFFFF;
 }
 
@@ -66,6 +66,29 @@
     image: url(:/fd/images/check_on.png);
 }
 
+QProgressBar {
+    background-color: transparent;
+    padding: 0px;
+    margin: 0px;
+    border: none;
+}
+QProgressBar::chunk {
+    background-color: #46B9F0;
+    padding: 0px;
+    margin: 0px;
+}
+
+/*#DownloadItemUi {
+    background-color: #d1eaff;
+}*/
+
+QListWidget::QScrollBar:horizontal {
+    border: 2px solid grey;
+     background: #32CC99;
+     height: 15px;
+     margin: 0px 20px 0 20px;
+}
+
 /**
 * mainWindow style
 ****************************/
@@ -82,7 +105,7 @@
     background-color: #46B9F0;
 }
 
-#newTaskTitle QLabel {
+#newTaskTitle .QLabel {
     color: #FFFFFF;
 }
 

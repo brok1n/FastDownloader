@@ -1,6 +1,7 @@
 #ifndef DOWNLOADTASK_H
 #define DOWNLOADTASK_H
 
+
 #include "downloadmanager.h"
 
 #include <QNetworkReply>
@@ -12,21 +13,26 @@
 #include <QFile>
 #include <QFileInfo>
 #include <QDir>
-
+#include "downloaditemui.h"
 #include <downloadworker.h>
+
 class DownloadManager;
+class DownloadItemUi;
+
 
 class DownloadTask : public QObject
 {
     Q_OBJECT
 public:
     explicit DownloadTask(QNetworkAccessManager *manager, DownloadManager *parent = nullptr);
-    void init( QString url, QString path);
+    void init( QString url, QString path, bool multiple=true);
     void setCallBack(void (*updateProgress)(qint64, qint64), void (*finished)(), void (*failed)(QNetworkReply::NetworkError));
     void start();
     void pause();
     void stop();
     void remove();
+    //和ui绑定
+    void bindUi(DownloadItemUi *ui);
 
     //这个task是否是空闲的
     bool isFree();
@@ -35,6 +41,10 @@ public:
 
 signals:
     void startDownload();
+    void onParseName(QString name);
+    void onSingleDownload();
+    void onMultipleDownload();
+    void onUpdateProgress(int *, int);
 
 
 
@@ -52,6 +62,8 @@ private slots:
 
 
 private:
+    //ui
+    DownloadItemUi *mUi;
     //QNetworkAccessManager
     QNetworkAccessManager *mManager;
     //QNetworkReply
@@ -72,10 +84,13 @@ private:
     DownloadWorker *mWorker5;
 
     // 线程数
+    bool mMultipleThread;
     int mWorkerCount;
     //完成线程id和
     int mWorkerIdSum;
     int mFinishedWorkerIdSum;
+    //下载进度列表
+    int *mPercent;
 
     //downloadFile
     QString mDownloadFullPath;

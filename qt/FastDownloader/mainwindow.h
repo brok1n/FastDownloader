@@ -10,11 +10,14 @@
 #include <newtaskdialog.h>
 #include <QThread>
 #include <urlwatcher.h>
+#include <QListWidget>
 
 class NewTaskDialog;
 
 QT_BEGIN_NAMESPACE
-namespace Ui { class MainWindow; }
+namespace Ui {
+class MainWindow;
+}
 QT_END_NAMESPACE
 
 class MainWindow : public QMainWindow
@@ -25,8 +28,6 @@ public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
     void retranslateUi(QMainWindow *MainWindow);
-    //初始化 用来持有QApppplication对象引用
-    void init(QApplication *app);
     //添加一个下载任务
     void addTask(QString url, QString downloadDir);
 
@@ -67,6 +68,10 @@ private slots:
 
     // 当 url监控线程发现了有效的url 触发
     void onWatchUrl();
+    //修改样式
+    void setStyle(QString styleName);
+    //初始化托盘
+    void initSystemTray();
 
 private:
     Ui::MainWindow *ui;
@@ -82,8 +87,6 @@ private:
     QAction *mShowWindowAction;
     // 退出程序菜单项
     QAction *mExitAppAction;
-    //对QApplication引用
-    QApplication *mApp;
     //新建下载弹框
     NewTaskDialog *mNewTaskDialog;
     //剪切板URL监控线程

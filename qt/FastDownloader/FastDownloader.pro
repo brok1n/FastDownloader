@@ -17,6 +17,7 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 SOURCES += \
     datacenter.cpp \
+    downloaditemui.cpp \
     downloadmanager.cpp \
     downloadtask.cpp \
     downloadworker.cpp \
@@ -27,6 +28,7 @@ SOURCES += \
 
 HEADERS += \
     datacenter.h \
+    downloaditemui.h \
     downloadmanager.h \
     downloadtask.h \
     downloadworker.h \
@@ -35,6 +37,7 @@ HEADERS += \
     urlwatcher.h
 
 FORMS += \
+    downloaditemui.ui \
     mainwindow.ui \
     newtaskdialog.ui
 

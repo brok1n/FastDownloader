@@ -1,6 +1,11 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
+//#include "ui_downloaditemui.h"
+#include "downloaditemui.h"
+#include "downloadtask.h"
+
+
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
@@ -12,51 +17,27 @@ MainWindow::MainWindow(QWidget *parent)
     //无标题栏 无边框
     setWindowFlags(Qt::Window | Qt::FramelessWindowHint);
 
-    QFile file(":/fd/css/default.css");
-    file.open(QFile::ReadOnly);
-    QString style = QLatin1String(file.readAll());
-    this->setStyleSheet(style);
-    file.close();
+    //默认样式
+    this->setStyle("default");
+    //托盘
+    this->initSystemTray();
 
-    //新建QSystemTrayIcon对象
-    mSysTrayIcon = new QSystemTrayIcon(this);
-    //新建托盘要显示的icon
-    QIcon icon = QIcon(":/fd/images/logo128.jpg");
-    //将icon设到QSystemTrayIcon对象中
-    mSysTrayIcon->setIcon(icon);
-    //当鼠标移动到托盘上的图标时，会显示此处设置的内容
-    mSysTrayIcon->setToolTip(QString("快速下载器"));
-    //给QSystemTrayIcon添加槽函数
-    connect(mSysTrayIcon,SIGNAL(activated(QSystemTrayIcon::ActivationReason)),this,SLOT(on_activitedSystemTrayIcon(QSystemTrayIcon::ActivationReason)));
-
-    // 托盘菜单
-    mTrayMenu = new QMenu(this);
-    mShowWindowAction = new QAction(mTrayMenu);
-    mExitAppAction = new QAction(mTrayMenu);
-
-    mShowWindowAction->setText("打开");
-    mExitAppAction->setText("退出");
-
-    mTrayMenu->addAction(mShowWindowAction);
-    mTrayMenu->addAction(mExitAppAction);
-
-    connect(mShowWindowAction, SIGNAL(triggered()), this, SLOT(on_showMainWindowAction()));
-    connect(mExitAppAction, SIGNAL(triggered()), this, SLOT(on_ExitAppAction()));
-
-    mSysTrayIcon->setContextMenu(mTrayMenu);
-
-    //在系统托盘显示此对象
-    mSysTrayIcon->show();
-    retranslateUi(this);
+    //设置图标
+    QIcon appIcon = QIcon(":/fd/images/logo128.jpg");
+    qApp->setWindowIcon(appIcon);
+    setWindowIcon(appIcon);
+    setIconSize(QSize(128, 128));
 
     DataCenter::GetInstance(this);
 
     startUrlWatcher();
+
+    retranslateUi(this);
+
 }
 
 MainWindow::~MainWindow()
 {
-    mApp = NULL;
     mSysTrayIcon->deleteLater( );
     delete ui;
 }
@@ -66,20 +47,42 @@ void MainWindow::retranslateUi(QMainWindow*)
 
 }
 
-void MainWindow::init(QApplication *app)
-{
-    mApp = app;
-    // application icon
-    QIcon icon = QIcon(":/fd/images/logo128.jpg");
-    setWindowIcon(icon);
-    setIconSize(QSize(128, 128));
-}
-
 void MainWindow::addTask(QString url, QString downloadDir)
 {
     qDebug("下载任务: %s", url.toStdString().c_str());
     qDebug("保存路径: %s", downloadDir.toStdString().c_str());
-    DownloadManager::GetInstance()->downloadFile(url, downloadDir);
+    DownloadTask *task = DownloadManager::GetInstance()->downloadFile(url, downloadDir);
+
+    QListWidgetItem *qItem = new QListWidgetItem(this->ui->downloadList);
+    qItem->setBackground(QColor(222, 237, 252));
+    qItem->setSizeHint(QSize(350, 60));
+
+    DownloadItemUi *listItem = new DownloadItemUi(this->ui->downloadList);
+    listItem->setStyleSheet("margin-bottom: 5px;");
+    listItem->show();
+    listItem->bindDownloadTask(task);
+    task->bindUi(listItem);
+    this->ui->downloadList->setItemWidget(qItem, listItem);
+
+
+
+//    DownloadTask *task2 = DownloadManager::GetInstance()->downloadFile(url, downloadDir, false);
+
+//    QListWidgetItem *qItem2 = new QListWidgetItem(this->ui->downloadList);
+//    qItem2->setBackground(QColor(222, 237, 252));
+//    qItem2->setSizeHint(QSize(350, 55));
+
+//    DownloadItemUi *listItem2 = new DownloadItemUi(this->ui->downloadList);
+//    listItem2->show();
+//    listItem2->bindDownloadTask(task2);
+//    task2->bindUi(listItem2);
+//    this->ui->downloadList->setItemWidget(qItem2, listItem2);
+
+
+    if(this->ui->emptyDownloadImage->isVisible()) {
+        this->ui->emptyDownloadImage->setVisible(false);
+    }
+
 }
 
 void MainWindow::startUrlWatcher()
@@ -209,7 +212,7 @@ void MainWindow::on_showMainWindowAction()
 
 void MainWindow::on_ExitAppAction()
 {
-    mApp->quit();
+    qApp->quit();
 }
 
 void MainWindow::on_lockTopCbox_stateChanged(int arg1)
@@ -230,4 +233,45 @@ void MainWindow::onWatchUrl()
     } else {
         this->on_newTaskBtn_clicked();
     }
+}
+
+void MainWindow::setStyle(QString styleName) {
+    QFile file(":/fd/css/" + styleName + ".css");
+    file.open(QFile::ReadOnly);
+    QString style = QLatin1String(file.readAll());
+    file.close();
+    this->setStyleSheet(style);
+}
+
+void MainWindow::initSystemTray()
+{
+    //新建QSystemTrayIcon对象
+    mSysTrayIcon = new QSystemTrayIcon(this);
+    //新建托盘要显示的icon
+    QIcon icon = QIcon(":/fd/images/logo128.jpg");
+    //将icon设到QSystemTrayIcon对象中
+    mSysTrayIcon->setIcon(icon);
+    //当鼠标移动到托盘上的图标时，会显示此处设置的内容
+    mSysTrayIcon->setToolTip(QString("快速下载器"));
+    //给QSystemTrayIcon添加槽函数
+    connect(mSysTrayIcon,SIGNAL(activated(QSystemTrayIcon::ActivationReason)),this,SLOT(on_activitedSystemTrayIcon(QSystemTrayIcon::ActivationReason)));
+
+    // 托盘菜单
+    mTrayMenu = new QMenu(this);
+    mShowWindowAction = new QAction(mTrayMenu);
+    mExitAppAction = new QAction(mTrayMenu);
+
+    mShowWindowAction->setText("打开");
+    mExitAppAction->setText("退出");
+
+    mTrayMenu->addAction(mShowWindowAction);
+    mTrayMenu->addAction(mExitAppAction);
+
+    connect(mShowWindowAction, SIGNAL(triggered()), this, SLOT(on_showMainWindowAction()));
+    connect(mExitAppAction, SIGNAL(triggered()), this, SLOT(on_ExitAppAction()));
+
+    mSysTrayIcon->setContextMenu(mTrayMenu);
+
+    //在系统托盘显示此对象
+    mSysTrayIcon->show();
 }
