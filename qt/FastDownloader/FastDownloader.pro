@@ -54,3 +54,6 @@ RESOURCES += \
 
 DISTFILES += \
     css/default.css
+
+
+RC_FILE = fd.rc
