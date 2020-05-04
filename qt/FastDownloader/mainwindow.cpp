@@ -5,6 +5,8 @@
 #include "downloaditemui.h"
 #include "downloadtask.h"
 
+#include <QTranslator>
+#include <QLocale>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -16,6 +18,9 @@ MainWindow::MainWindow(QWidget *parent)
     ui->setupUi(this);
     //无标题栏 无边框
     setWindowFlags(Qt::Window | Qt::FramelessWindowHint);
+
+    //自动根据当前系统语言翻译 现在只支持 中文 英文 两种
+    autoTranslate();
 
     //默认样式
     this->setStyle("default");
@@ -33,8 +38,6 @@ MainWindow::MainWindow(QWidget *parent)
 
     startUrlWatcher();
 
-    retranslateUi(this);
-
 }
 
 MainWindow::~MainWindow()
@@ -43,9 +46,34 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
-void MainWindow::retranslateUi(QMainWindow*)
+void MainWindow::autoTranslate()
 {
+    //多语言支持
+    QLocale locale;
+    QVariant val;
+    QString translatorFileName = "";
 
+    //获取当前系统默认语言
+    auto lang = locale.language();
+    //根据语言 选择不同翻译文件 默认中文不用翻译
+    switch(lang)
+    {
+        case QLocale::Chinese:
+            // 默认中文 不用翻译
+            break;
+        default:
+            //其他语言 都用英文
+            translatorFileName = ":/fd/FastDownloader_en_US.qm";
+            break;
+    }
+
+    //  翻译 有翻译文件名 就翻译 默认是中文 翻译文件名为空 不用翻译
+    if(translatorFileName.length() > 0) {
+        QTranslator *m_qtTranslator = new QTranslator;
+        m_qtTranslator->load(translatorFileName);
+        qApp->installTranslator(m_qtTranslator);
+        ui->retranslateUi(this);
+    }
 }
 
 void MainWindow::addTask(QString url, QString downloadDir)
@@ -149,13 +177,12 @@ void MainWindow::on_minBtn_clicked()
 
 void MainWindow::on_newTaskBtn_clicked()
 {
+    //如果没有创建NewTaskDialog 就创建，如果创建过了 就直接用
     if(mNewTaskDialog == Q_NULLPTR ) {
         mNewTaskDialog = new NewTaskDialog(this);
         mNewTaskDialog->setModal(false);
     }
     mNewTaskDialog->reset();
-//    NewTaskDialog *newTaskDialog = new NewTaskDialog(this);
-//    newTaskDialog->setModal(true);1
     mNewTaskDialog->show();
 }
 
@@ -169,10 +196,7 @@ void MainWindow::on_activitedSystemTrayIcon(QSystemTrayIcon::ActivationReason re
             //第二个参数是消息内容
             //第三个参数图标
             //第四个参数是超时毫秒数
-//            mSysTrayIcon->showMessage(QObject::trUtf8("Message Title"),
-//                                      QObject::trUtf8("欢迎使用此程序"),
-//                                      QSystemTrayIcon::Information,
-//                                      1000);
+//            mSysTrayIcon->showMessage(QObject::trUtf8("Message Title"), QObject::trUtf8("欢迎使用此程序"), QSystemTrayIcon::Information, 1000);
 
             break;
         case QSystemTrayIcon::DoubleClick:
@@ -204,6 +228,7 @@ void MainWindow::on_ExitAppAction()
 
 void MainWindow::on_lockTopCbox_stateChanged(int arg1)
 {
+    //根据用户选择 是否固定到屏幕最前面
     if(arg1==2) {
         setWindowFlags(windowFlags() | Qt::WindowStaysOnTopHint);
     } else {
@@ -232,14 +257,11 @@ void MainWindow::setStyle(QString styleName) {
 
 void MainWindow::initSystemTray()
 {
-    //新建QSystemTrayIcon对象
+    //初始化托盘
     mSysTrayIcon = new QSystemTrayIcon(this);
-    //新建托盘要显示的icon
     QIcon icon = QIcon(":/fd/images/logo128.jpg");
-    //将icon设到QSystemTrayIcon对象中
     mSysTrayIcon->setIcon(icon);
-    //当鼠标移动到托盘上的图标时，会显示此处设置的内容
-    mSysTrayIcon->setToolTip(QString("快速下载器"));
+    mSysTrayIcon->setToolTip(tr("快速下载器"));
     //给QSystemTrayIcon添加槽函数
     connect(mSysTrayIcon,SIGNAL(activated(QSystemTrayIcon::ActivationReason)),this,SLOT(on_activitedSystemTrayIcon(QSystemTrayIcon::ActivationReason)));
 
@@ -248,8 +270,8 @@ void MainWindow::initSystemTray()
     mShowWindowAction = new QAction(mTrayMenu);
     mExitAppAction = new QAction(mTrayMenu);
 
-    mShowWindowAction->setText("打开");
-    mExitAppAction->setText("退出");
+    mShowWindowAction->setText(tr("打开"));
+    mExitAppAction->setText(tr("退出"));
 
     mTrayMenu->addAction(mShowWindowAction);
     mTrayMenu->addAction(mExitAppAction);

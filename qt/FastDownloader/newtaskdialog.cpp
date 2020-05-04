@@ -113,7 +113,7 @@ void NewTaskDialog::on_newTaskDownloadBtn_clicked()
 void NewTaskDialog::on_newTaskSelectDirBtn_clicked()
 {
     //文件夹路径
-    QString srcDirPath = QFileDialog::getExistingDirectory(this, "要下载到什么文件夹?", DownloadManager::GetInstance()->getDownloadPath());
+    QString srcDirPath = QFileDialog::getExistingDirectory(this, tr("要下载到什么文件夹?"), DownloadManager::GetInstance()->getDownloadPath());
 
     if (srcDirPath.isEmpty())
     {

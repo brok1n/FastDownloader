@@ -29,7 +29,7 @@
    </size>
   </property>
   <property name="windowTitle">
-   <string>高速下载器</string>
+   <string>快速下载器</string>
   </property>
   <property name="autoFillBackground">
    <bool>false</bool>

@@ -15,5 +15,6 @@
         <file>images/start_btn_disable.jpg</file>
         <file>images/check_off.png</file>
         <file>images/check_on.png</file>
+        <file>FastDownloader_en_US.qm</file>
     </qresource>
 </RCC>

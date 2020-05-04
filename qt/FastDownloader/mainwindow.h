@@ -27,7 +27,8 @@ class MainWindow : public QMainWindow
 public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
-    void retranslateUi(QMainWindow *MainWindow);
+    //自动语言翻译
+    void autoTranslate();
     //添加一个下载任务
     void addTask(QString url, QString downloadDir);
 
