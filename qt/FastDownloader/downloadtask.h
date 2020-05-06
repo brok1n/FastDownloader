@@ -55,6 +55,9 @@ private slots:
     void workerFinished(int id);
     void updateProgress(int id, qint64 recived, qint64 total);
     void error(int id, int code, QString msg);
+
+    //探测失败
+    void probError(QNetworkReply::NetworkError err);
 //    void worker2Finished();
 //    void worker3Finished();
 //    void worker4Finished();
@@ -96,7 +99,6 @@ private:
     QString mDownloadFullPath;
     QString mDownloadFullPathTemp;
     QFile *mDownloadFile;
-    uchar *mDownloadFileMapPtr;
     // is downloading
     bool mDownloading;
     // is pause

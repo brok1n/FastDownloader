@@ -19,9 +19,30 @@ int main(int argc, char *argv[])
 //    QFile file("b.txt");
 //    file.open(QIODevice::ReadWrite);
 
-//    uchar *mptr = file.map(0, len);
+//    int mapLen = 1024;
 
-//    mptr[len-1] = 0;  // this line  error  SIGSEGV
+//    uchar *mptr = file.map(len-mapLen, mapLen);
+
+//    for(int i = 0; i < mapLen; i ++) {
+//        mptr[i] = i;  // this line  error  SIGSEGV
+//    }
+
+//    uchar *mptr2 = file.map(len-mapLen * 2, mapLen);
+
+//    for(int i = 0; i < mapLen; i ++) {
+//        mptr2[i] = i;  // this line  error  SIGSEGV
+//    }
+
+
+//    uchar *mptr3 = file.map(len-mapLen * 3, mapLen);
+
+//    for(int i = 0; i < mapLen; i ++) {
+//        mptr3[i] = i;  // this line  error  SIGSEGV
+//    }
+
+//    file.unmap(mptr);
+//    file.unmap(mptr2);
+//    file.unmap(mptr3);
 
 //    file.flush();
 //    file.close();

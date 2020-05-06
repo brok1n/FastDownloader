@@ -1,6 +1,8 @@
 #include "downloadtask.h"
 #include "downloaditemui.h"
 
+#include <QSsl>
+
 DownloadTask::DownloadTask(QNetworkAccessManager *manager, DownloadManager *parent)
     : QObject(parent)
     , mUi(Q_NULLPTR)
@@ -26,7 +28,6 @@ DownloadTask::DownloadTask(QNetworkAccessManager *manager, DownloadManager *pare
     , mDownloadFullPath("")
     , mDownloadFullPathTemp("")
     , mDownloadFile(Q_NULLPTR)
-    , mDownloadFileMapPtr(Q_NULLPTR)
     , mCompletected(false)
 {
     this->mManager = manager;
@@ -89,7 +90,6 @@ void DownloadTask::init(QString url, QString path, bool multiple)
     this->mDownloadFullPath = "";
     this->mDownloadFullPathTemp = "";
     this->mDownloadFile = Q_NULLPTR;
-    this->mDownloadFileMapPtr = Q_NULLPTR;
     // file size
     this->mFileSize = 0;
     // download max speed
@@ -123,11 +123,26 @@ void DownloadTask::start()
 {
     // 先用断点续传的方式请求5个字节 探测文件基本信息
     QNetworkRequest requests;
+
+    //解决SSL证书错误问题
+    QSslConfiguration config = QSslConfiguration::defaultConfiguration();
+    config.setProtocol(QSsl::TlsV1_2);
+    config.setPeerVerifyMode(QSslSocket::VerifyNone);
+    requests.setSslConfiguration(config);
+
     requests.setUrl(this->mUrl);
     requests.setRawHeader("Range", "bytes=0-4");
     mReply = mManager->get(requests);
 
+
+
     connect(mManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(probFinished(QNetworkReply*)));
+    connect(mReply, SIGNAL(error(QNetworkReply::NetworkError)), this, SLOT(probError(QNetworkReply::NetworkError)));
+}
+
+void DownloadTask::probError(QNetworkReply::NetworkError err) {
+    qDebug("资源访问异常！ %d", err);
+
 }
 
 void DownloadTask::pause()
@@ -183,8 +198,9 @@ QString getAvaliableFilePath(QString filePath, QString nPath="", int repeatCount
     return filePath;
 }
 
-void DownloadTask::probFinished(QNetworkReply *)
+void DownloadTask::probFinished(QNetworkReply *repl)
 {
+    qDebug("prob code:%d", repl->error());
 
     QList<QByteArray> headers = mReply->rawHeaderList();
     for(int i = 0; i < headers.size(); i ++) {
@@ -197,7 +213,7 @@ void DownloadTask::probFinished(QNetworkReply *)
     QString contentLength = mReply->rawHeader("Content-Length").trimmed();
     QString contentRange = mReply->rawHeader("Content-Range").trimmed();
 
-    mFileSize = contentLength.toInt();
+
 
     QString contentDescription = mReply->rawHeader("Content-Disposition").trimmed();
 
@@ -228,10 +244,14 @@ void DownloadTask::probFinished(QNetworkReply *)
     qDebug("本地文件临时路径:%s", mDownloadFullPathTemp.toStdString().c_str());
 
     QStringList strList = contentRange.split("/");
-    if(mMultipleThread && strList.size() == 2) {
-        qDebug("多线程下载");
+    if(strList.size() == 2){
         mFileSize = strList.at(1).toDouble();
-        qDebug("文件大小:%lld", mFileSize);
+    } else {
+        mFileSize = contentLength.toInt();
+    }
+
+    if(mMultipleThread && strList.size() == 2) {
+        qDebug("多线程下载文件大小:%lld", mFileSize);
 
         //通知 多线程下载
         emit onMultipleDownload();
@@ -241,10 +261,11 @@ void DownloadTask::probFinished(QNetworkReply *)
         mDownloadFile->open(QIODevice::ReadWrite);
         mDownloadFile->flush();
         mDownloadFile->close();
+        mDownloadFile->deleteLater();
+        mDownloadFile = Q_NULLPTR;
 
         mDownloadFile = new QFile(mDownloadFullPathTemp);
         mDownloadFile->open(QIODevice::ReadWrite);
-        mDownloadFileMapPtr = mDownloadFile->map(0, mFileSize);
 
         mWorkerCount = mDownloadWorkerList->size();
         qint64 start = 0;
@@ -263,7 +284,7 @@ void DownloadTask::probFinished(QNetworkReply *)
             if(i == mWorkerCount - 1) {
                 end += blockMod;
             }
-            worker->download(mUrl, mDownloadFileMapPtr, start, end);
+            worker->download(mUrl, mDownloadFile, start, end, true);
             connect(worker, SIGNAL(updateProgress(int, qint64, qint64)), this, SLOT(updateProgress(int, qint64, qint64)));
             connect(worker, SIGNAL(error(int, int, QString)), this, SLOT(error(int, int, QString)));
             connect(worker, SIGNAL(workerFinished(int)), this, SLOT(workerFinished(int)));
@@ -282,12 +303,11 @@ void DownloadTask::probFinished(QNetworkReply *)
 
         mDownloadFile = new QFile(mDownloadFullPathTemp);
         mDownloadFile->open(QIODevice::ReadWrite);
-        mDownloadFileMapPtr = mDownloadFile->map(0, mFileSize);
 
         //不支持断点续传 或者控制单线程下载，就只能单个线程直接下载
         DownloadWorker *worker = mDownloadWorkerList->at(0);
-        this->mWorkerIdSum += worker->id();
-        worker->download(mUrl, mDownloadFileMapPtr, 0, mFileSize);
+        this->mWorkerIdSum = worker->id();
+        worker->download(mUrl, mDownloadFile, 0, mFileSize, false);
         connect(worker, SIGNAL(updateProgress(int, qint64, qint64)), this, SLOT(updateProgress(int, qint64, qint64)));
         connect(worker, SIGNAL(error(int, int, QString)), this, SLOT(error(int, int, QString)));
         connect(worker, SIGNAL(workerFinished(int)), this, SLOT(workerFinished(int)));
@@ -308,14 +328,16 @@ void DownloadTask::workerFinished(int id)
     mFinishedWorkerIdSum += id;
     if(mFinishedWorkerIdSum >= mWorkerIdSum) {
         mDownloadFile->flush();
-        mDownloadFile->unmap(mDownloadFileMapPtr);
         mDownloadFile->close();
+        mDownloadFile->deleteLater();
+        mDownloadFile = Q_NULLPTR;
 
         //为了确保重命名成功，先检查一下重命名后的文件是否存在，如果存在，就按下载文件重名自动在文件名后加(重复文件数)
          mDownloadFullPath = getAvaliableFilePath(mDownloadFullPath);
 
-        mDownloadFile->rename(mDownloadFullPath);
-        mDownloadFile->close();
+        QFile file(mDownloadFullPathTemp);
+        file.rename(mDownloadFullPath);
+        file.close();
 
         for(int i = 0; i < mWorkerCount; i ++) {
             DownloadWorker *worker = mDownloadWorkerList->at(i);
@@ -338,12 +360,6 @@ void DownloadTask::workerFinished(int id)
             mPercent[i] = 0;
         }
 
-//        QFile file(mDownloadFullPathTemp);
-//        file.rename(mDownloadFullPath);
-//        file.close();
-
-//        this->mDownloadManager->finished(this);
-        //    ((DownloadManager*)parent())->finished(this);
     }
 }
 

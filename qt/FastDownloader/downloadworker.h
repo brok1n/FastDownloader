@@ -8,6 +8,9 @@
 #include <QEventLoop>
 #include <QEventLoop>
 #include <QFile>
+#include <QByteArray>
+
+#define BUFFER_SIZE 4200000
 
 class DownloadWorker : public QObject
 {
@@ -15,8 +18,7 @@ class DownloadWorker : public QObject
 public:
     ~DownloadWorker();
     explicit DownloadWorker(int id);
-    void download(QString url, QFile *downloadFile, qint64 start, qint64 end);
-    void download(QString url, uchar *mptr, qint64 start, qint64 end);
+    void download(QString url, QFile *downloadFile, qint64 start, qint64 end, bool multiple);
     int  id();
 
 signals:
@@ -41,12 +43,14 @@ private:
     QNetworkAccessManager *mManager;
     QNetworkReply *mReply;
     qint64 mDownloadIndex;
+    //是否是多线程
+    bool mMultiple;
+    //下载缓冲区
+    QByteArray *mBuffer;
     // 下载地址
     QString mUrl;
     // 本地文件
     QFile *mDownloadFile;
-    //内存映射文件指针
-    uchar *mMptr;
     // 下载开始位置
     qint64 mStart;
     // 下载结束位置

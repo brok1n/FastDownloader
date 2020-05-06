@@ -9,9 +9,10 @@ DownloadWorker::DownloadWorker(int id)
     : mId(id)
     , mReply(Q_NULLPTR)
     , mDownloadIndex(0)
+    , mMultiple(true)
+    , mBuffer(new QByteArray())
     , mUrl("")
     , mDownloadFile(Q_NULLPTR)
-    , mMptr(Q_NULLPTR)
     , mStart(0)
     , mEnd(0)
     , mDownloadFinished(true)
@@ -22,34 +23,24 @@ DownloadWorker::DownloadWorker(int id)
 
 }
 
-void DownloadWorker::download(QString url, QFile *downloadFile, qint64 start, qint64 end)
+void DownloadWorker::download(QString url, QFile *downloadFile, qint64 start, qint64 end, bool multiple)
 {
+    qDebug("download file");
     if( !mDownloadFinished ) {
         return;
     }
+    if(downloadFile) {
+        qDebug() << "download file 文件对象正常!";
+    }
+    mBuffer->clear();
     mDownloadFinished = false;
     this->mUrl = url;
     this->mDownloadFile = downloadFile;
     this->mStart = start;
-    this->mDownloadIndex = mStart;
+    this->mDownloadIndex = start;
     this->mEnd = end;
     mWaitForDownload = true;
     qDebug(QString("%d 下载Worker:%1-%2 %3 即将开始下载").arg(mId).arg(mStart).arg(mEnd).arg(mUrl).toUtf8());
-}
-
-void DownloadWorker::download(QString url, uchar *mptr, qint64 start, qint64 end)
-{
-    if( !mDownloadFinished ) {
-        return;
-    }
-    mDownloadFinished = false;
-    this->mUrl = url;
-    this->mMptr = mptr;
-    this->mStart = start;
-    this->mDownloadIndex = mStart;
-    this->mEnd = end;
-    mWaitForDownload = true;
-    qDebug(QString("%1 下载Worker:%2-%3 %4 即将开始下载").arg(mId).arg(mStart).arg(mEnd).arg(mUrl).toUtf8());
 }
 
 int DownloadWorker::id()
@@ -65,13 +56,18 @@ void DownloadWorker::start()
         if( mWaitForDownload && !mUrl.isEmpty() && mEnd > 0) {
             mWaitForDownload = false;
             QNetworkRequest requests;
+
+            //解决SSL证书错误问题
+            QSslConfiguration config = QSslConfiguration::defaultConfiguration();
+            config.setProtocol(QSsl::TlsV1_2);
+            config.setPeerVerifyMode(QSslSocket::VerifyNone);
+            requests.setSslConfiguration(config);
+
             requests.setUrl(this->mUrl);
             requests.setRawHeader("Range", QString("bytes=%1-%2").arg(mStart).arg(mEnd).toUtf8());
             qDebug(requests.rawHeader("Range").toStdString().c_str());
             mReply = mManager->get(requests);
             qDebug(QString("%1 下载Worker:%2-%3 %4 开始下载...").arg(mId).arg(mStart).arg(mEnd).arg(mUrl).toUtf8());
-
-//            connect(mManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(mfinished(QNetworkReply*)), Qt::DirectConnection);
 
             connect(mReply, SIGNAL(downloadProgress(qint64, qint64)), this, SLOT(downloadProgress(qint64, qint64)));
 
@@ -103,6 +99,17 @@ void DownloadWorker::error(QNetworkReply::NetworkError err)
 
 void DownloadWorker::rfinished()
 {
+    QThread::msleep(200);
+    uint tmpLen = mBuffer->size();
+    uchar *fmp = mDownloadFile->map(mDownloadIndex, tmpLen);
+    if(fmp) {
+       memcpy(fmp, mBuffer->data(), tmpLen);
+       mDownloadFile->unmap(fmp);
+    } else {
+        qDebug("多线程下载, mmap错误!!!!!!!!!!!!!!");
+    }
+    mDownloadIndex += tmpLen;
+    mBuffer->clear();
     while(mDownloadIndex < mEnd) {
         qDebug("%d  index:%lld  end:%lld", mId, mDownloadIndex, mEnd);
         QThread::sleep(2);
@@ -125,7 +132,28 @@ void DownloadWorker::rfinished()
 void DownloadWorker::readyRead()
 {
     auto data = mReply->readAll();
-    for(qint64 i = 0;i < data.size(); i++) {
-        mMptr[mDownloadIndex++] = data.at(i);
+    uint tmpLen = data.size();
+
+    if(mMultiple) {
+        mBuffer->append(data);
+        tmpLen = mBuffer->size();
+        if(tmpLen > BUFFER_SIZE) {
+            uchar *fmp = mDownloadFile->map(mDownloadIndex, tmpLen);
+            if(fmp) {
+               memcpy(fmp, mBuffer->data(), tmpLen);
+               mDownloadFile->unmap(fmp);
+            } else {
+                qDebug("多线程下载, mmap错误!!!!!!!!!!!!!!");
+            }
+            mDownloadIndex += tmpLen;
+            mBuffer->clear();
+        }
+
+    } else {
+        //单线程下载，可以不用mmap 直接seek到指定下载位置写入数据
+        mDownloadFile->seek(mDownloadIndex);
+        mDownloadFile->write(data);
+        mDownloadFile->flush();
+        mDownloadIndex += tmpLen;
     }
 }
