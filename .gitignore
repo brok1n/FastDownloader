@@ -10,6 +10,10 @@
 *.dll
 *.dylib
 
+# ssl lib
+!libcrypto-1_1.dll
+!libssl-1_1.dll
+
 # Qt-es
 object_script.*.Release
 object_script.*.Debug
