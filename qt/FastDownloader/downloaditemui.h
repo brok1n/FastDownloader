@@ -23,9 +23,11 @@ public:
 
 public slots:
     void onParseName(QString name);
+    void onContentLength(qint64 len);
     void onSingleDownload();
     void onMultipleDownload();
     void onUpdateProgress(int *, int);
+    void downloadCompletected();
 
 private:
     Ui::DownloadItemUi *ui;

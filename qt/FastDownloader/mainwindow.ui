@@ -38,6 +38,9 @@
    <string notr="true">background-color:#FFFFFF;</string>
   </property>
   <widget class="QWidget" name="mainContent">
+   <property name="styleSheet">
+    <string notr="true"/>
+   </property>
    <widget class="QWidget" name="title" native="true">
     <property name="geometry">
      <rect>
@@ -115,9 +118,9 @@ image: url(:/fd/images/close_btn_bg.jpg);</string>
    <widget class="QWidget" name="toolsBar" native="true">
     <property name="geometry">
      <rect>
-      <x>0</x>
+      <x>1</x>
       <y>45</y>
-      <width>350</width>
+      <width>348</width>
       <height>30</height>
      </rect>
     </property>
@@ -201,10 +204,10 @@ image: url(:/fd/images/close_btn_bg.jpg);</string>
    <widget class="QWidget" name="statusBar" native="true">
     <property name="geometry">
      <rect>
-      <x>0</x>
+      <x>1</x>
       <y>560</y>
-      <width>350</width>
-      <height>40</height>
+      <width>348</width>
+      <height>39</height>
      </rect>
     </property>
     <property name="styleSheet">
@@ -227,14 +230,72 @@ image: url(:/fd/images/close_btn_bg.jpg);</string>
    <widget class="QListWidget" name="downloadList">
     <property name="geometry">
      <rect>
-      <x>0</x>
+      <x>1</x>
       <y>75</y>
-      <width>350</width>
+      <width>348</width>
       <height>485</height>
      </rect>
     </property>
     <property name="styleSheet">
-     <string notr="true"/>
+     <string notr="true">
+QScrollBar:vertical {
+	border:none;
+      background:transparent;
+      width: 5px;
+      margin: 0;
+}
+
+
+QScrollBar:hover {
+	width:20px;
+}
+/**
+滚动条拖动按钮
+*/
+QScrollBar::handle:vertical {
+  background:  #46B9F0;
+  min-height: 20px;
+}
+/*
+QScrollBar::up-arrow:vertical, QScrollBar::down-arrow:vertical {
+  border: 2px solid #00FF00;
+  width: 3px;
+  height: 3px;
+  background: #FF0000;
+}
+QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {
+  background: none;
+}*/
+
+/**
+滚动条底部按钮块
+*/
+QScrollBar::add-line:vertical {
+  border:none;
+  background: transparent;
+  height:0px;
+  subcontrol-position: bottom;
+  subcontrol-origin: margin;
+}
+/**
+滚动条顶部按钮块
+*/
+QScrollBar::sub-line:vertical {
+  border:none;
+  background: #FF0000;
+  height: 0px;
+  subcontrol-position: top;
+  subcontrol-origin: margin;
+}</string>
+    </property>
+    <property name="verticalScrollBarPolicy">
+     <enum>Qt::ScrollBarAsNeeded</enum>
+    </property>
+    <property name="horizontalScrollBarPolicy">
+     <enum>Qt::ScrollBarAlwaysOff</enum>
+    </property>
+    <property name="sizeAdjustPolicy">
+     <enum>QAbstractScrollArea::AdjustIgnored</enum>
     </property>
    </widget>
    <widget class="QLabel" name="emptyDownloadImage">

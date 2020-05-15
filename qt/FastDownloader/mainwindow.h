@@ -11,6 +11,7 @@
 #include <QThread>
 #include <urlwatcher.h>
 #include <QListWidget>
+#include <QTranslator>
 
 class NewTaskDialog;
 
@@ -76,6 +77,7 @@ private slots:
 
 private:
     Ui::MainWindow *ui;
+    QTranslator qtTranslator;
     // move window
     bool mMoveWindow;
     //press x,y

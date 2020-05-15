@@ -42,9 +42,11 @@ public:
 signals:
     void startDownload();
     void onParseName(QString name);
+    void onContentLength(qint64 len);
     void onSingleDownload();
     void onMultipleDownload();
     void onUpdateProgress(int *, int);
+    void downloadCompletected();
 
 
 

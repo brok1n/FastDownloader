@@ -40,7 +40,7 @@ void DownloadWorker::download(QString url, QFile *downloadFile, qint64 start, qi
     this->mDownloadIndex = start;
     this->mEnd = end;
     mWaitForDownload = true;
-    qDebug(QString("%d 下载Worker:%1-%2 %3 即将开始下载").arg(mId).arg(mStart).arg(mEnd).arg(mUrl).toUtf8());
+    qDebug(QString("%1 下载Worker:%2-%3 %4 即将开始下载").arg(mId).arg(mStart).arg(mEnd).arg(mUrl).toUtf8());
 }
 
 int DownloadWorker::id()

@@ -164,9 +164,11 @@ void DownloadTask::bindUi(DownloadItemUi *ui)
 {
     mUi = ui;
     connect(this, SIGNAL(onParseName(QString)), ui, SLOT(onParseName(QString)));
+    connect(this, SIGNAL(onContentLength(qint64)), ui, SLOT(onContentLength(qint64)));
     connect(this, SIGNAL(onSingleDownload()), ui, SLOT(onSingleDownload()));
-    connect(this, SIGNAL(onMultipleDownload()), ui, SLOT(onMultipleDownload()) );
+    connect(this, SIGNAL(onMultipleDownload()), ui, SLOT(onMultipleDownload()));
     connect(this, SIGNAL(onUpdateProgress(int*, int)), ui, SLOT(onUpdateProgress(int*, int)));
+    connect(this, SIGNAL(downloadCompletected()), ui, SLOT(downloadCompletected()));
 }
 
 bool DownloadTask::isFree()
@@ -249,6 +251,8 @@ void DownloadTask::probFinished(QNetworkReply *repl)
     } else {
         mFileSize = contentLength.toInt();
     }
+
+    emit onContentLength(mFileSize);
 
     if(mMultipleThread && strList.size() == 2) {
         qDebug("多线程下载文件大小:%lld", mFileSize);
@@ -350,11 +354,16 @@ void DownloadTask::workerFinished(int id)
 
         mCompletected = true;
 
+        //发送下载完毕的信号
+        emit downloadCompletected();
+
         //释放信号连接
         disconnect(this, SIGNAL(onParseName(QString)), mUi, SLOT(onParseName(QString)));
+        disconnect(this, SIGNAL(onContentLength(qint64)), mUi, SLOT(onContentLength(qint64)));
         disconnect(this, SIGNAL(onSingleDownload()), mUi, SLOT(onSingleDownload()));
         disconnect(this, SIGNAL(onMultipleDownload()), mUi, SLOT(onMultipleDownload()) );
         disconnect(this, SIGNAL(onUpdateProgress(int*, int)), mUi, SLOT(onUpdateProgress(int*, int)));
+        disconnect(this, SIGNAL(downloadCompletected()), mUi, SLOT(downloadCompletected()));
 
         for(int i = 0; i < mWorkerCount; i++) {
             mPercent[i] = 0;

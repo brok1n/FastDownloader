@@ -7,6 +7,7 @@
 
 #include <QTranslator>
 #include <QLocale>
+#include <QScrollBar>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -15,7 +16,11 @@ MainWindow::MainWindow(QWidget *parent)
     , mUrlWatcherThread(Q_NULLPTR)
     , mUrlWatcher(Q_NULLPTR)
 {
+
     ui->setupUi(this);
+//    ui->downloadList->verticalScrollBar()->setStyleSheet("QScrollBar { width:0px;}");
+
+
     //无标题栏 无边框
     setWindowFlags(Qt::Window | Qt::FramelessWindowHint);
 
@@ -50,7 +55,6 @@ void MainWindow::autoTranslate()
 {
     //多语言支持
     QLocale locale;
-    QVariant val;
     QString translatorFileName = "";
 
     //获取当前系统默认语言
@@ -69,9 +73,8 @@ void MainWindow::autoTranslate()
 
     //  翻译 有翻译文件名 就翻译 默认是中文 翻译文件名为空 不用翻译
     if(translatorFileName.length() > 0) {
-        QTranslator *m_qtTranslator = new QTranslator;
-        m_qtTranslator->load(translatorFileName);
-        qApp->installTranslator(m_qtTranslator);
+        qtTranslator.load(translatorFileName);
+        qApp->installTranslator(&qtTranslator);
         ui->retranslateUi(this);
     }
 }
@@ -84,7 +87,7 @@ void MainWindow::addTask(QString url, QString downloadDir)
 
     QListWidgetItem *qItem = new QListWidgetItem(this->ui->downloadList);
     qItem->setBackground(QColor(222, 237, 252));
-    qItem->setSizeHint(QSize(350, 60));
+    qItem->setSizeHint(QSize(348, 60));
 
     DownloadItemUi *listItem = new DownloadItemUi(this->ui->downloadList);
     listItem->setStyleSheet("margin-bottom: 5px;");
@@ -263,6 +266,7 @@ void MainWindow::initSystemTray()
     mSysTrayIcon->setIcon(icon);
     mSysTrayIcon->setToolTip(tr("快速下载器"));
     //给QSystemTrayIcon添加槽函数
+
     connect(mSysTrayIcon,SIGNAL(activated(QSystemTrayIcon::ActivationReason)),this,SLOT(on_activitedSystemTrayIcon(QSystemTrayIcon::ActivationReason)));
 
     // 托盘菜单
