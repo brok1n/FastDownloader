@@ -4,6 +4,7 @@
 //#include "ui_downloaditemui.h"
 #include "downloaditemui.h"
 #include "downloadtask.h"
+#include "helpdialog.h"
 
 #include <QTranslator>
 #include <QLocale>
@@ -18,7 +19,9 @@ MainWindow::MainWindow(QWidget *parent)
 {
 
     ui->setupUi(this);
-//    ui->downloadList->verticalScrollBar()->setStyleSheet("QScrollBar { width:0px;}");
+    //先把没实现功能的按钮隐藏
+    this->ui->pauseAllBtn->setVisible(false);
+    this->ui->startAllBtn->setVisible(false);
 
 
     //无标题栏 无边框
@@ -287,4 +290,12 @@ void MainWindow::initSystemTray()
 
     //在系统托盘显示此对象
     mSysTrayIcon->show();
+}
+
+void MainWindow::on_helpBtn_clicked()
+{
+    //如果没有创建NewTaskDialog 就创建，如果创建过了 就直接用
+    HelpDialog *helpDialog = new HelpDialog(this);
+    helpDialog->setModal(true);
+    helpDialog->show();
 }

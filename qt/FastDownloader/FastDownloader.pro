@@ -22,6 +22,7 @@ SOURCES += \
     downloadmanager.cpp \
     downloadtask.cpp \
     downloadworker.cpp \
+    helpdialog.cpp \
     main.cpp \
     mainwindow.cpp \
     newtaskdialog.cpp \
@@ -34,12 +35,14 @@ HEADERS += \
     downloadmanager.h \
     downloadtask.h \
     downloadworker.h \
+    helpdialog.h \
     mainwindow.h \
     newtaskdialog.h \
     urlwatcher.h
 
 FORMS += \
     downloaditemui.ui \
+    helpdialog.ui \
     mainwindow.ui \
     newtaskdialog.ui
 

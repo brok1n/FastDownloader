@@ -114,6 +114,30 @@ image: url(:/fd/images/close_btn_bg.jpg);</string>
       <string/>
      </property>
     </widget>
+    <widget class="QPushButton" name="helpBtn">
+     <property name="geometry">
+      <rect>
+       <x>244</x>
+       <y>0</y>
+       <width>21</width>
+       <height>31</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <family>Arial</family>
+       <pointsize>12</pointsize>
+      </font>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">border:none;
+background: transparent;
+color:#FFFFFF;</string>
+     </property>
+     <property name="text">
+      <string>?</string>
+     </property>
+    </widget>
    </widget>
    <widget class="QWidget" name="toolsBar" native="true">
     <property name="geometry">

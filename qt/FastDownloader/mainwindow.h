@@ -75,6 +75,8 @@ private slots:
     //初始化托盘
     void initSystemTray();
 
+    void on_helpBtn_clicked();
+
 private:
     Ui::MainWindow *ui;
     QTranslator qtTranslator;
