@@ -56,6 +56,7 @@ void DownloadItemUi::onUpdateProgress(int *progressList, int len)
     int count = 0;
     for(int i = 0; i < len; i ++) {
         mProgressBarList->at(i)->setValue(progressList[i]);
+        mProgressBarList->at(i)->update();
         count += progressList[i];
     }
     int progress = int(count / (len * 100.0) * 100);

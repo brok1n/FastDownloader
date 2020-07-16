@@ -49,6 +49,17 @@ void NewTaskDialog::mouseMoveEvent(QMouseEvent *event)
     }
 }
 
+void NewTaskDialog::showEvent(QShowEvent *event)
+{
+    qDebug("show Event");
+    this->ui->newTaskAddrEdit->setFocus();
+}
+
+void NewTaskDialog::hideEvent(QHideEvent *event)
+{
+    qDebug("hide Event");
+}
+
 bool NewTaskDialog::eventFilter(QObject *watched, QEvent *event)
 {
     if( watched == this )

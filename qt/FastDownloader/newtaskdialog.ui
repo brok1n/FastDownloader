@@ -48,11 +48,14 @@
     </property>
     <property name="font">
      <font>
-      <family>System</family>
-      <pointsize>16</pointsize>
-      <weight>75</weight>
-      <bold>true</bold>
+      <family>Arial</family>
+      <pointsize>-1</pointsize>
+      <weight>50</weight>
+      <bold>false</bold>
      </font>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">font-size:18px;</string>
     </property>
     <property name="text">
      <string>新建下载</string>
