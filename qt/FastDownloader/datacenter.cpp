@@ -104,6 +104,8 @@ void DataCenter::initWatchTypeList()
 DataCenter::~DataCenter()
 {
     this->deleteLater();
+    this->mSm->detach();
+    qDebug("删除");
 }
 
 DataCenter *DataCenter::GetInstance()
@@ -117,6 +119,11 @@ DataCenter *DataCenter::GetInstance()
         }
     }
     return mInstance;
+}
+
+void DataCenter::setSharedMemory(QSharedMemory *m)
+{
+    this->mSm = m;
 }
 
 bool DataCenter::urlWatcherIsRunning()

@@ -3,6 +3,7 @@
 
 #include <QObject>
 #include <QMutex>
+#include <QSharedMemory>
 class DataCenter : public QObject
 {
     Q_OBJECT
@@ -13,6 +14,7 @@ private:
 public:
     ~DataCenter();
     static DataCenter* GetInstance();
+    void setSharedMemory(QSharedMemory *);
 
 signals:
 
@@ -39,6 +41,8 @@ private:
     QString mCancelUrl;
     //已经被检测到并发送监测消息的url，之后就不监测这个url了
     QString mWatchedUrl;
+
+    QSharedMemory *mSm;
 
 
 private:

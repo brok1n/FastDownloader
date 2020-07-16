@@ -225,6 +225,7 @@ void MainWindow::on_activitedSystemTrayIcon(QSystemTrayIcon::ActivationReason re
 void MainWindow::on_showMainWindowAction()
 {
     this->show();
+    this->setWindowState((this->windowState() & ~Qt::WindowMinimized) | Qt::WindowActive);
 }
 
 void MainWindow::on_ExitAppAction()

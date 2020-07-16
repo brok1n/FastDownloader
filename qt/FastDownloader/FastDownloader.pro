@@ -30,6 +30,7 @@ SOURCES += \
 
 HEADERS += \
     common.h \
+    config.h \
     datacenter.h \
     downloaditemui.h \
     downloadmanager.h \

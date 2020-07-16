@@ -3,9 +3,6 @@
 
 #include <QObject>
 
-const int GB = 1024 * 1024 * 1024;//定义GB的计算常量
-const int MB = 1024 * 1024;//定义MB的计算常量
-const int KB = 1024;//定义KB的计算常量
 
 class Common : public QObject
 {
