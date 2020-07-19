@@ -1,3 +1,4 @@
+#include "common.h"
 #include "downloadworker.h"
 
 DownloadWorker::~DownloadWorker()
@@ -18,7 +19,9 @@ DownloadWorker::DownloadWorker(int id)
     , mDownloadFinished(true)
     , mWaitForDownload(false)
     , mEventLoop(Q_NULLPTR)
-
+    , mLastTime(0)
+    , mRecvDataLen(0)
+    , mSpeed(0)
 {
 
 }
@@ -46,6 +49,11 @@ void DownloadWorker::download(QString url, QFile *downloadFile, qint64 start, qi
 int DownloadWorker::id()
 {
     return this->mId;
+}
+
+qint64 DownloadWorker::getSpeed()
+{
+    return mSpeed;
 }
 
 void DownloadWorker::start()
@@ -125,14 +133,32 @@ void DownloadWorker::rfinished()
     mEventLoop->quit();
     mDownloadFinished = true;
 
+    mSpeed = 0;
+
     emit this->workerFinished(mId);
 }
 
 
 void DownloadWorker::readyRead()
 {
+    if(mLastTime == 0)
+    {
+        mLastTime = QDateTime::currentDateTime().toMSecsSinceEpoch();
+    }
+
     auto data = mReply->readAll();
     uint tmpLen = data.size();
+
+    mRecvDataLen += tmpLen;
+
+    qint64 offset = QDateTime::currentDateTime().toMSecsSinceEpoch() - mLastTime;
+    if(offset >= 1000)
+    {
+        mSpeed = mRecvDataLen / (float)(offset / 1000);
+        qDebug() << "speed:" << Common::lenToTxt(mSpeed) << "b/s";
+        mLastTime = QDateTime::currentDateTime().toMSecsSinceEpoch();
+        mRecvDataLen = 0;
+    }
 
     if(mMultiple) {
         mBuffer->append(data);

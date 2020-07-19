@@ -9,17 +9,17 @@ DownloadTask::DownloadTask(QNetworkAccessManager *manager, DownloadManager *pare
     , mReply(Q_NULLPTR)
     , mDownloadThreadList(new QList<QThread*>())
     , mDownloadWorkerList(new QList<DownloadWorker*>())
-    , mThread1(new QThread())
-    , mThread2(new QThread())
-    , mThread3(new QThread())
-    , mThread4(new QThread())
-    , mThread5(new QThread())
+//    , mThread1(new QThread())
+//    , mThread2(new QThread())
+//    , mThread3(new QThread())
+//    , mThread4(new QThread())
+//    , mThread5(new QThread())
 
-    , mWorker1(new DownloadWorker(1))
-    , mWorker2(new DownloadWorker(2))
-    , mWorker3(new DownloadWorker(3))
-    , mWorker4(new DownloadWorker(4))
-    , mWorker5(new DownloadWorker(5))
+//    , mWorker1(new DownloadWorker(1))
+//    , mWorker2(new DownloadWorker(2))
+//    , mWorker3(new DownloadWorker(3))
+//    , mWorker4(new DownloadWorker(4))
+//    , mWorker5(new DownloadWorker(5))
     , mMultipleThread(true)
     , mWorkerCount(5)
     , mWorkerIdSum(0)
@@ -33,17 +33,17 @@ DownloadTask::DownloadTask(QNetworkAccessManager *manager, DownloadManager *pare
     this->mManager = manager;
     this->mDownloadManager = parent;
 
-    mWorker1->moveToThread(mThread1);
-    mWorker2->moveToThread(mThread2);
-    mWorker3->moveToThread(mThread3);
-    mWorker4->moveToThread(mThread4);
-    mWorker5->moveToThread(mThread5);
+//    mWorker1->moveToThread(mThread1);
+//    mWorker2->moveToThread(mThread2);
+//    mWorker3->moveToThread(mThread3);
+//    mWorker4->moveToThread(mThread4);
+//    mWorker5->moveToThread(mThread5);
 
-    mThread1->start();
-    mThread2->start();
-    mThread3->start();
-    mThread4->start();
-    mThread5->start();
+//    mThread1->start();
+//    mThread2->start();
+//    mThread3->start();
+//    mThread4->start();
+//    mThread5->start();
 
     mPercent = new int[mWorkerCount]();
     for( int i = 1; i <= mWorkerCount; i ++ ) {
@@ -58,11 +58,11 @@ DownloadTask::DownloadTask(QNetworkAccessManager *manager, DownloadManager *pare
     }
 
 
-    connect(this, &DownloadTask::startDownload, mWorker1, &DownloadWorker::start);
-    connect(this, &DownloadTask::startDownload, mWorker2, &DownloadWorker::start);
-    connect(this, &DownloadTask::startDownload, mWorker3, &DownloadWorker::start);
-    connect(this, &DownloadTask::startDownload, mWorker4, &DownloadWorker::start);
-    connect(this, &DownloadTask::startDownload, mWorker5, &DownloadWorker::start);
+//    connect(this, &DownloadTask::startDownload, mWorker1, &DownloadWorker::start);
+//    connect(this, &DownloadTask::startDownload, mWorker2, &DownloadWorker::start);
+//    connect(this, &DownloadTask::startDownload, mWorker3, &DownloadWorker::start);
+//    connect(this, &DownloadTask::startDownload, mWorker4, &DownloadWorker::start);
+//    connect(this, &DownloadTask::startDownload, mWorker5, &DownloadWorker::start);
     emit startDownload();
 
     this->mDownloading = false;
@@ -176,6 +176,11 @@ void DownloadTask::bindUi(DownloadItemUi *ui)
 bool DownloadTask::isFree()
 {
     return this->mCompletected;
+}
+
+DownloadWorker *DownloadTask::getDownloadWorker(int i)
+{
+    return mDownloadWorkerList->at(i);
 }
 
 QString getAvaliableFilePath(QString filePath, QString nPath="", int repeatCount=0) {
@@ -381,6 +386,7 @@ void DownloadTask::workerFinished(int id)
         //释放信号连接
         disconnect(this, SIGNAL(onParseName(QString)), mUi, SLOT(onParseName(QString)));
         disconnect(this, SIGNAL(onContentLength(qint64)), mUi, SLOT(onContentLength(qint64)));
+        disconnect(this, SIGNAL(onDownloadFailed(QString)), mUi, SLOT(onDownloadFailed(QString)));
         disconnect(this, SIGNAL(onSingleDownload()), mUi, SLOT(onSingleDownload()));
         disconnect(this, SIGNAL(onMultipleDownload()), mUi, SLOT(onMultipleDownload()) );
         disconnect(this, SIGNAL(onUpdateProgress(int*, int)), mUi, SLOT(onUpdateProgress(int*, int)));

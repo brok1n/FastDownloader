@@ -20,6 +20,7 @@ public:
     explicit DownloadWorker(int id);
     void download(QString url, QFile *downloadFile, qint64 start, qint64 end, bool multiple);
     int  id();
+    qint64 getSpeed();
 
 signals:
     void workerFinished(int id);
@@ -61,6 +62,12 @@ private:
     bool mWaitForDownload;
 
     QEventLoop *mEventLoop;
+    //下载时间
+    qint64 mLastTime;
+    //下载数据大小
+    qint64 mRecvDataLen;
+    //下载速度
+    qint64 mSpeed;
 };
 
 #endif // DOWNLOADWORKER_H

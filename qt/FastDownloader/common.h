@@ -11,7 +11,7 @@ public:
     explicit Common(QObject *parent = nullptr);
 
     //数据类型转换 qint64转成友好的 GB  MB  KB b
-    QString lenToTxt(qint64 len);
+    static QString lenToTxt(qint64 len);
 
 
 signals:

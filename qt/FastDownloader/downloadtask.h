@@ -37,7 +37,7 @@ public:
     //这个task是否是空闲的
     bool isFree();
 
-
+    DownloadWorker* getDownloadWorker(int);
 
 signals:
     void startDownload();
@@ -77,17 +77,17 @@ private:
     // 下载线程列表
     QList<QThread*> *mDownloadThreadList;
     QList<DownloadWorker*> *mDownloadWorkerList;
-    QThread *mThread1;
-    QThread *mThread2;
-    QThread *mThread3;
-    QThread *mThread4;
-    QThread *mThread5;
-    //workerl列表
-    DownloadWorker *mWorker1;
-    DownloadWorker *mWorker2;
-    DownloadWorker *mWorker3;
-    DownloadWorker *mWorker4;
-    DownloadWorker *mWorker5;
+//    QThread *mThread1;
+//    QThread *mThread2;
+//    QThread *mThread3;
+//    QThread *mThread4;
+//    QThread *mThread5;
+//    //workerl列表
+//    DownloadWorker *mWorker1;
+//    DownloadWorker *mWorker2;
+//    DownloadWorker *mWorker3;
+//    DownloadWorker *mWorker4;
+//    DownloadWorker *mWorker5;
 
     // 线程数
     bool mMultipleThread;

@@ -35,38 +35,48 @@ void DownloadItemUi::onParseName(QString name)
 
 void DownloadItemUi::onContentLength(qint64 len)
 {
-    Common common;
-    this->ui->contentLenLabel->setText(common.lenToTxt(len));
+    this->ui->contentLenLabel->setText(Common::lenToTxt(len));
 }
 
 void DownloadItemUi::onDownloadFailed(QString msg)
 {
-    msg.insert(0, "下载失败:");
-    this->ui->statusLabel->setText(msg);
+    if(msg.isEmpty())
+    {
+        this->ui->statusLabel->setText("下载失败");
+    }
+    else
+    {
+        this->ui->statusLabel->setText(msg.insert(0, "下载失败:"));
+    }
 }
 
 void DownloadItemUi::onSingleDownload()
 {
-    this->ui->progressBar1->resize(330, 23);
+    this->ui->progressBar1->resize(330, 16);
     this->ui->statusLabel->setText("开始下载");
 }
 
 void DownloadItemUi::onMultipleDownload()
 {
-    this->ui->progressBar1->resize(66, 23);
+    this->ui->progressBar1->resize(66, 16);
     this->ui->statusLabel->setText("开始下载");
 }
 
 void DownloadItemUi::onUpdateProgress(int *progressList, int len)
 {
     int count = 0;
+    qint64 speed = 0;
     for(int i = 0; i < len; i ++) {
         mProgressBarList->at(i)->setValue(progressList[i]);
         mProgressBarList->at(i)->update();
         count += progressList[i];
+         speed += mDownloadTask->getDownloadWorker(i)->getSpeed();
     }
     int progress = int(count / (len * 100.0) * 100);
     this->ui->statusLabel->setText(QString("%1%").arg(progress));
+
+    this->ui->speedLabel->setText(QString("%1/s").arg(Common::lenToTxt(speed)));
+
 }
 
 void DownloadItemUi::downloadCompletected()

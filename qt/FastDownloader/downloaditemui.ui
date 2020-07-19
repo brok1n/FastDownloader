@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>348</width>
-    <height>55</height>
+    <width>349</width>
+    <height>68</height>
    </rect>
   </property>
   <property name="font">
@@ -24,7 +24,7 @@
     <rect>
      <x>10</x>
      <y>5</y>
-     <width>260</width>
+     <width>331</width>
      <height>16</height>
     </rect>
    </property>
@@ -38,7 +38,7 @@
      <x>10</x>
      <y>25</y>
      <width>66</width>
-     <height>23</height>
+     <height>16</height>
     </rect>
    </property>
    <property name="value">
@@ -57,7 +57,7 @@
      <x>76</x>
      <y>25</y>
      <width>66</width>
-     <height>23</height>
+     <height>16</height>
     </rect>
    </property>
    <property name="value">
@@ -76,7 +76,7 @@
      <x>208</x>
      <y>25</y>
      <width>66</width>
-     <height>23</height>
+     <height>16</height>
     </rect>
    </property>
    <property name="value">
@@ -95,7 +95,7 @@
      <x>142</x>
      <y>25</y>
      <width>66</width>
-     <height>23</height>
+     <height>16</height>
     </rect>
    </property>
    <property name="value">
@@ -114,7 +114,7 @@
      <x>274</x>
      <y>25</y>
      <width>66</width>
-     <height>23</height>
+     <height>16</height>
     </rect>
    </property>
    <property name="value">
@@ -143,10 +143,10 @@
   <widget class="QLabel" name="statusLabel">
    <property name="geometry">
     <rect>
-     <x>72</x>
-     <y>25</y>
-     <width>201</width>
-     <height>23</height>
+     <x>82</x>
+     <y>40</y>
+     <width>181</width>
+     <height>20</height>
     </rect>
    </property>
    <property name="text">
@@ -159,10 +159,26 @@
   <widget class="QLabel" name="contentLenLabel">
    <property name="geometry">
     <rect>
-     <x>280</x>
-     <y>5</y>
-     <width>61</width>
-     <height>16</height>
+     <x>10</x>
+     <y>40</y>
+     <width>71</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string/>
+   </property>
+   <property name="alignment">
+    <set>Qt::AlignCenter</set>
+   </property>
+  </widget>
+  <widget class="QLabel" name="speedLabel">
+   <property name="geometry">
+    <rect>
+     <x>260</x>
+     <y>40</y>
+     <width>81</width>
+     <height>20</height>
     </rect>
    </property>
    <property name="text">
