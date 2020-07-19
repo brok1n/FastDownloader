@@ -149,7 +149,7 @@ bool DataCenter::checkUrl(QString url)
         return false;
     }
     QString ext = "." + sp.at(sp.size()-1);
-    if((url.startsWith("http://") || url.startsWith("https://")) && this->mWatcherTypeList->contains(ext)) {
+    if((url.startsWith("http://") || url.startsWith("https://"))) {
         // 记录这个匹配的地址, 下次就不再监测这个url了，除非URL发生了变化
         mWatchedUrl = url;
         return true;
