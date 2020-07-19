@@ -43,6 +43,7 @@ signals:
     void startDownload();
     void onParseName(QString name);
     void onContentLength(qint64 len);
+    void onDownloadFailed(QString);
     void onSingleDownload();
     void onMultipleDownload();
     void onUpdateProgress(int *, int);

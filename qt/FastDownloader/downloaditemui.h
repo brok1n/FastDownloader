@@ -24,6 +24,7 @@ public:
 public slots:
     void onParseName(QString name);
     void onContentLength(qint64 len);
+    void onDownloadFailed(QString msg);
     void onSingleDownload();
     void onMultipleDownload();
     void onUpdateProgress(int *, int);

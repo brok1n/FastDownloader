@@ -39,6 +39,12 @@ void DownloadItemUi::onContentLength(qint64 len)
     this->ui->contentLenLabel->setText(common.lenToTxt(len));
 }
 
+void DownloadItemUi::onDownloadFailed(QString msg)
+{
+    msg.insert(0, "下载失败:");
+    this->ui->statusLabel->setText(msg);
+}
+
 void DownloadItemUi::onSingleDownload()
 {
     this->ui->progressBar1->resize(330, 23);

@@ -141,8 +141,9 @@ void DownloadTask::start()
 }
 
 void DownloadTask::probError(QNetworkReply::NetworkError err) {
+//    disconnect(mManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(probFinished(QNetworkReply*)));
     qDebug("资源访问异常！ %d", err);
-
+//    emit onDownloadFailed("资源访问异常");
 }
 
 void DownloadTask::pause()
@@ -165,6 +166,7 @@ void DownloadTask::bindUi(DownloadItemUi *ui)
     mUi = ui;
     connect(this, SIGNAL(onParseName(QString)), ui, SLOT(onParseName(QString)));
     connect(this, SIGNAL(onContentLength(qint64)), ui, SLOT(onContentLength(qint64)));
+    connect(this, SIGNAL(onDownloadFailed(QString)), ui, SLOT(onDownloadFailed(QString)));
     connect(this, SIGNAL(onSingleDownload()), ui, SLOT(onSingleDownload()));
     connect(this, SIGNAL(onMultipleDownload()), ui, SLOT(onMultipleDownload()));
     connect(this, SIGNAL(onUpdateProgress(int*, int)), ui, SLOT(onUpdateProgress(int*, int)));
@@ -220,16 +222,19 @@ void DownloadTask::probFinished(QNetworkReply *repl)
     QString contentDescription = mReply->rawHeader("Content-Disposition").trimmed();
 
     QString filename = "";
-    if(contentDescription.size() > 10 && contentDescription.indexOf("=") > 0) {
+    if(contentDescription.size() > 10 && contentDescription.indexOf("=") > 0)
+    {
         contentDescription.replace("\"", "");
         int idx = contentDescription.indexOf("=");
-        if (idx >= 0 && idx < contentDescription.length()) {
+        if (idx >= 0 && idx < contentDescription.length())
+        {
             filename = contentDescription.mid(idx+1);
         }
     }
     qDebug("文件名:%s", filename.toStdString().c_str());
 
-    if(filename.isEmpty()) {
+    if(filename.isEmpty())
+    {
         auto qurl = new QUrl(mUrl);
         filename = qurl->fileName();
     }
@@ -246,75 +251,91 @@ void DownloadTask::probFinished(QNetworkReply *repl)
     qDebug("本地文件临时路径:%s", mDownloadFullPathTemp.toStdString().c_str());
 
     QStringList strList = contentRange.split("/");
-    if(strList.size() == 2){
+    if(strList.size() == 2)
+    {
         mFileSize = strList.at(1).toDouble();
-    } else {
+    }
+    else
+    {
         mFileSize = contentLength.toInt();
     }
 
     emit onContentLength(mFileSize);
 
-    if(mMultipleThread && strList.size() == 2) {
-        qDebug("多线程下载文件大小:%lld", mFileSize);
+    if(repl->error() == 0 )
+    {
+        if(mMultipleThread && strList.size() == 2)
+        {
+            qDebug("多线程下载文件大小:%lld", mFileSize);
 
-        //通知 多线程下载
-        emit onMultipleDownload();
+            //通知 多线程下载
+            emit onMultipleDownload();
 
-        mDownloadFile = new QFile(mDownloadFullPathTemp);
-        mDownloadFile->resize(mFileSize);
-        mDownloadFile->open(QIODevice::ReadWrite);
-        mDownloadFile->flush();
-        mDownloadFile->close();
-        mDownloadFile->deleteLater();
-        mDownloadFile = Q_NULLPTR;
+            mDownloadFile = new QFile(mDownloadFullPathTemp);
+            mDownloadFile->resize(mFileSize);
+            mDownloadFile->open(QIODevice::ReadWrite);
+            mDownloadFile->flush();
+            mDownloadFile->close();
+            mDownloadFile->deleteLater();
+            mDownloadFile = Q_NULLPTR;
 
-        mDownloadFile = new QFile(mDownloadFullPathTemp);
-        mDownloadFile->open(QIODevice::ReadWrite);
+            mDownloadFile = new QFile(mDownloadFullPathTemp);
+            mDownloadFile->open(QIODevice::ReadWrite);
 
-        mWorkerCount = mDownloadWorkerList->size();
-        qint64 start = 0;
-        qint64 end = 0;
-        qint64 block = mFileSize / mWorkerCount;
-        qint64 blockMod = mFileSize % mWorkerCount;
-        for(int i = 0; i < mWorkerCount; i ++) {
-            DownloadWorker *worker = mDownloadWorkerList->at(i);
-            this->mWorkerIdSum += worker->id();
-            start = i * block;
-            end = start + block;
-            if(i > 0) {
-                start += 1;
+            mWorkerCount = mDownloadWorkerList->size();
+            qint64 start = 0;
+            qint64 end = 0;
+            qint64 block = mFileSize / mWorkerCount;
+            qint64 blockMod = mFileSize % mWorkerCount;
+            for(int i = 0; i < mWorkerCount; i ++)
+            {
+                DownloadWorker *worker = mDownloadWorkerList->at(i);
+                this->mWorkerIdSum += worker->id();
+                start = i * block;
+                end = start + block;
+                if(i > 0)
+                {
+                    start += 1;
+                }
+                //最后一个 要把多余的加上
+                if(i == mWorkerCount - 1)
+                {
+                    end += blockMod;
+                }
+                worker->download(mUrl, mDownloadFile, start, end, true);
+                connect(worker, SIGNAL(updateProgress(int, qint64, qint64)), this, SLOT(updateProgress(int, qint64, qint64)));
+                connect(worker, SIGNAL(error(int, int, QString)), this, SLOT(error(int, int, QString)));
+                connect(worker, SIGNAL(workerFinished(int)), this, SLOT(workerFinished(int)));
             }
-            //最后一个 要把多余的加上
-            if(i == mWorkerCount - 1) {
-                end += blockMod;
-            }
-            worker->download(mUrl, mDownloadFile, start, end, true);
+        }
+        else
+        {
+            qDebug("单线程下载! 文件大小:%lld", mFileSize);
+
+            //通知 单线程下载
+            emit onSingleDownload();
+
+            mDownloadFile = new QFile(mDownloadFullPathTemp);
+            mDownloadFile->resize(mFileSize);
+            mDownloadFile->open(QIODevice::ReadWrite);
+            mDownloadFile->flush();
+            mDownloadFile->close();
+
+            mDownloadFile = new QFile(mDownloadFullPathTemp);
+            mDownloadFile->open(QIODevice::ReadWrite);
+
+            //不支持断点续传 或者控制单线程下载，就只能单个线程直接下载
+            DownloadWorker *worker = mDownloadWorkerList->at(0);
+            this->mWorkerIdSum = worker->id();
+            worker->download(mUrl, mDownloadFile, 0, mFileSize, false);
             connect(worker, SIGNAL(updateProgress(int, qint64, qint64)), this, SLOT(updateProgress(int, qint64, qint64)));
             connect(worker, SIGNAL(error(int, int, QString)), this, SLOT(error(int, int, QString)));
             connect(worker, SIGNAL(workerFinished(int)), this, SLOT(workerFinished(int)));
         }
-    } else {
-        qDebug("单线程下载! 文件大小:%lld", mFileSize);
-
-        //通知 单线程下载
-        emit onSingleDownload();
-
-        mDownloadFile = new QFile(mDownloadFullPathTemp);
-        mDownloadFile->resize(mFileSize);
-        mDownloadFile->open(QIODevice::ReadWrite);
-        mDownloadFile->flush();
-        mDownloadFile->close();
-
-        mDownloadFile = new QFile(mDownloadFullPathTemp);
-        mDownloadFile->open(QIODevice::ReadWrite);
-
-        //不支持断点续传 或者控制单线程下载，就只能单个线程直接下载
-        DownloadWorker *worker = mDownloadWorkerList->at(0);
-        this->mWorkerIdSum = worker->id();
-        worker->download(mUrl, mDownloadFile, 0, mFileSize, false);
-        connect(worker, SIGNAL(updateProgress(int, qint64, qint64)), this, SLOT(updateProgress(int, qint64, qint64)));
-        connect(worker, SIGNAL(error(int, int, QString)), this, SLOT(error(int, int, QString)));
-        connect(worker, SIGNAL(workerFinished(int)), this, SLOT(workerFinished(int)));
+    }
+    else
+    {
+        emit onDownloadFailed("");
     }
 
     qDebug("文件大小:%lld", mFileSize);
